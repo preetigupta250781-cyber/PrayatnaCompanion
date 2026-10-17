@@ -8,6 +8,7 @@ import { queryClient } from '@/shared/lib/query-client';
 import { supabase } from '@/shared/lib/supabase';
 import { useAuthStore } from '@/features/auth';
 import { useAppTheme } from '@/shared/hooks/use-theme';
+import { logger } from '@/shared/lib/logger';
 
 // Keep splash screen visible until auth session is resolved
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -31,7 +32,9 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
         }
       })
       .catch((error: unknown) => {
-        console.warn('Error fetching Supabase session:', error);
+        logger.warn('Error fetching initial Supabase session', {
+          error: error instanceof Error ? error.message : String(error),
+        });
         if (isMounted) {
           setIsInitialized(true);
         }

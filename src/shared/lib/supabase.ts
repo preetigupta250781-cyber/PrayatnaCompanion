@@ -3,6 +3,7 @@ import { createClient, SupportedStorage } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { env } from '@/config/env';
+import { logger } from '@/shared/lib/logger';
 
 // SecureStore has a 2048-byte limit per key-value pair on Android and iOS Keychain.
 // We use a safe chunk size of 1800 bytes to account for any internal overhead.
@@ -44,7 +45,9 @@ const SecureStoreChunkingAdapter: SupportedStorage = {
 
       return await SecureStore.getItemAsync(key);
     } catch (error: unknown) {
-      console.warn('SecureStore getItem error:', error);
+      logger.warn('SecureStore getItem error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   },
@@ -96,7 +99,9 @@ const SecureStoreChunkingAdapter: SupportedStorage = {
         }
       }
     } catch (error: unknown) {
-      console.error('SecureStore setItem error:', error);
+      logger.error('SecureStore setItem error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   },
@@ -121,7 +126,9 @@ const SecureStoreChunkingAdapter: SupportedStorage = {
       }
       await SecureStore.deleteItemAsync(key).catch(() => {});
     } catch (error: unknown) {
-      console.warn('SecureStore removeItem error:', error);
+      logger.warn('SecureStore removeItem error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   },
 };

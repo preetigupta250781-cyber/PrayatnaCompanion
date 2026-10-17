@@ -119,18 +119,38 @@ The codebase follows a **Feature-Sliced / Clean Architecture** pattern to guaran
 
 ---
 
-## 5. Verification & Quality Assurance Summary
+## 5. Architectural Contracts & Core Standards
+
+### 5.1 The 5-State Screen Contract
+Every screen in Prayatna Companion must strictly adhere to the five-state design contract using `<ScreenState>`:
+1. **Loading State:** Renders `<Skeleton>` layout matching the final page geometry. Spinners are banned except inside buttons.
+2. **Error State:** Renders `<ErrorState>` with a friendly, human-readable message and an accessible Retry button (never raw exceptions).
+3. **Empty State:** Renders `<EmptyState>` with a track/domain glyph, helpful context, and actionable guidance.
+4. **Offline State:** Renders `<OfflineBanner>` at the top while rendering cached data if available.
+5. **Success State:** Displays data seamlessly with no layout shift.
+
+### 5.2 Date & Time Standardization (`Asia/Kolkata`)
+All user-facing dates and countdowns are processed through `src/shared/utils/date.ts` using `date-fns` and `date-fns-tz`. The app explicitly enforces the `Asia/Kolkata` (IST) timezone, with unit tests covering midnight rollover and international device timezone discrepancies.
+
+### 5.3 Secure Structured Logger (`src/shared/lib/logger.ts`)
+Direct `console.log` is prohibited. All logging flows through `logger.info`, `logger.warn`, and `logger.error`, which automatically sanitizes and redacts PII, access tokens, and credentials.
+
+---
+
+## 6. Verification & Quality Assurance Summary
 
 | Quality Check | Command Run | Result | Notes |
 |---|---|---|---|
-| **TypeScript Strictness** | `npm run typecheck` | **PASS (Exit 0)** | 0 type errors; strict mode enabled; no `any` used. |
+| **TypeScript Strictness** | `npm run typecheck` | **PASS (Exit 0)** | 0 type errors; strict mode + `noUncheckedIndexedAccess: true`. |
+| **ESLint & Code Standards** | `npm run lint` | **PASS (Exit 0)** | 0 errors, 0 warnings. |
+| **Unit Testing Suite** | `npm test` | **PASS (Exit 0)** | 12 tests passed across 2 test suites. |
 | **Expo Metro Dev Server** | `npx expo start` | **PASS (Exit 0)** | Server booted cleanly; loaded `.env`; zero warnings. |
 | **Cross-Platform Bundler** | `npx expo export` | **PASS (Exit 0)** | All 5 tabs and auth stack bundled cleanly for iOS, Android, and Web. |
 | **Version Control & Security** | `git status` / `git log` | **PASS (Exit 0)** | Git initialized; `.env` excluded via `.gitignore`; clean tree. |
 
 ---
 
-## 6. Development Roadmap for Upcoming Phases
+## 7. Development Roadmap for Upcoming Phases
 
 - **Phase 2 (Database & Data Layer):**
   - Implement Supabase database schema for `teams`, `schedule_events`, `problem_tracks`, and `evaluations`.

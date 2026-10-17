@@ -191,7 +191,7 @@ function buildDocument() {
                           new TextRun({ text: 'Project Name: ', bold: true }),
                           new TextRun('Prayatna Companion Mobile Application\n'),
                           new TextRun({ text: 'Application Framework: ', bold: true }),
-                          new TextRun('Expo (SDK 58) / React Native (0.88) with Expo Router\n'),
+                          new TextRun('Expo (SDK 57) / React Native (0.86) with Expo Router\n'),
                           new TextRun({ text: 'Language & Typing: ', bold: true }),
                           new TextRun('TypeScript (Strict Mode Enabled, 0 "any" types)\n'),
                           new TextRun({ text: 'Backend Infrastructure: ', bold: true }),
@@ -271,14 +271,14 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('Expo SDK', 30, false, true),
-                  createDataCell('58.0.14', 20),
+                  createDataCell('57.0.30', 20),
                   createDataCell('Native toolchain, runtime, and continuous native build pipeline.', 50),
                 ],
               }),
               new TableRow({
                 children: [
                   createDataCell('Expo Router', 30, true, true),
-                  createDataCell('58.0.23', 20, true),
+                  createDataCell('57.0.28', 20, true),
                   createDataCell('Type-safe file-system based routing and screen navigators.', 50, true),
                 ],
               }),

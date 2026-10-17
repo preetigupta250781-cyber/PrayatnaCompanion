@@ -2,7 +2,7 @@
 
 **Project Name:** Prayatna Companion  
 **Application Type:** Cross-Platform Mobile Application (iOS & Android)  
-**Framework:** Expo (SDK 58) / React Native (0.88) with Expo Router  
+**Framework:** Expo (SDK 57) / React Native (0.86) with Expo Router  
 **Primary Language:** TypeScript (Strict Mode, 100% Type Safe, Zero `any`)  
 **Backend & Database:** Supabase  
 **Status:** Phase 1 Complete (Foundation, Architecture, Security, Theming & Navigation)  
@@ -26,9 +26,9 @@ The primary technical objective of Phase 1 was to establish an enterprise-grade,
 
 | Technology / Library | Version | Purpose in Application |
 |---|---|---|
-| **Expo SDK** | `~58.0.14` | Core mobile application framework and native toolchain |
-| **React Native** | `0.88.0` | Cross-platform UI runtime |
-| **Expo Router** | `~58.0.23` | File-based, type-safe navigation system |
+| **Expo SDK** | `~57.0.30` | Core mobile application framework and native toolchain (Play Store Expo Go compatible) |
+| **React Native** | `0.86.3` | Cross-platform UI runtime |
+| **Expo Router** | `~57.0.28` | File-based, type-safe navigation system |
 | **TypeScript** | `~6.0.3` | Compile-time type safety with `"strict": true` |
 | **@supabase/supabase-js** | `^2.118.0` | Backend-as-a-Service client (Auth, Database, Realtime) |
 | **@tanstack/react-query** | `^5.104.3` | Asynchronous server-state management and query caching |

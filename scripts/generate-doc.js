@@ -476,6 +476,28 @@ function buildDocument() {
                   'Key security assets include security definer functions (is_organizer, next_problem_release, server_now), a before-update trigger preventing non-organizers from altering their role or team_id, locked problem releases (release_at <= now()), locked leaderboard entries (published = true), a security-invoker leaderboard_view with dense_rank() and round breakdowns, and realtime publication registration with full replica identity.'
               ),
             ],
+            spacing: { after: 140 },
+          }),
+
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.6 Seed Data, Administrative CLI Automation & Documentation',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Implemented realistic seed dataset supabase/seed.sql (3 teams, 10 schedule events with midnight crossover, 4 problem statements with past and future release windows, 3 prioritized announcements, 2 transit routes for Indore and Bhopal with 5 stops each and geo-coordinates, and a published leaderboard with a 175-point tie). ' +
+                  'Built administrative CLI scripts scripts/import-participants.ts (bulk participant provisioning, team upserts, temporary password generation, rate limiting, and credentials.csv export) and scripts/create-organizer.ts (direct organizer provisioning), documented thoroughly in docs/ADMIN.md.'
+              ),
+            ],
             spacing: { after: 200 },
           }),
 

@@ -6,3 +6,5 @@ coverage/
 .husky/
 package-lock.json
 *.docx
+*.csv
+

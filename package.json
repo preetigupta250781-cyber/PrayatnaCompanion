@@ -69,6 +69,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "generate-docs": "node scripts/generate-doc.js",
+    "import:participants": "node --experimental-strip-types --no-warnings scripts/import-participants.ts",
+    "create:organizer": "node --experimental-strip-types --no-warnings scripts/create-organizer.ts",
     "prepare": "husky"
   },
   "private": true

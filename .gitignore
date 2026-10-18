@@ -46,3 +46,9 @@ example
 
 # test coverage
 coverage/
+
+# participant and credential CSV exports
+participants.csv
+credentials.csv
+*.csv
+

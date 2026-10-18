@@ -193,6 +193,34 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 - **Realtime Integration:**
   - Added `schedule_events`, `problem_statements`, `announcements`, `leaderboard_entries`, `bus_routes`, and `bus_stops` to `supabase_realtime` publication with `replica identity full`.
 
+### 4.8. Seed Dataset, Admin CLI Tooling & Administrative Documentation
+
+- **Realistic Seed Dataset (`supabase/seed.sql`):**
+  - **3 Teams:** `Team Binary Beasts` (`PRAYATNA-001`), `Indore Hackers` (`PRAYATNA-002`), `Quantum Solvers` (`PRAYATNA-003`).
+  - **10 Schedule Events:** Spread across October 24-25, 2026, including opening ceremony, keynotes, mentoring, meals, pitch presentations, and a critical midnight-crossing event (`Midnight Jamming & Code Review` from 23:00 to 02:00 IST).
+  - **4 Problem Statements:** 2 unlocked past problems (`Smart Transit Optimization`, `Agritech Crop Disease Predictor`) and 2 locked future problems (`Offline-First Healthcare Dispatch`, `Decentralized Campus Identity`) to test the time-locked RLS policy.
+  - **3 Broadcast Announcements:** One `urgent` broadcast (`Emergency: Venue WiFi SSID & Credentials Updated`), one `important` submission deadline reminder, and one `normal` lunch announcement.
+  - **2 Transit Bus Routes:**
+    - `Route 1 (Indore City Shuttle)`: 5 sequenced stops (Bhawarkua, Palasia, Vijay Nagar, Radisson Square, Hackathon Campus at Medi-Caps University) with polyline coordinate path points.
+    - `Route 2 (Bhopal to Indore Intercity Express)`: 5 sequenced stops (ISBT Bhopal, Sehore Bypass, Ashta Highway Stop, Dewas Bypass, Hackathon Campus) with polyline coordinate path points.
+  - **Published Leaderboard with Exact Tie:** 3 teams evaluated across Round 1 and Round 2, creating an exact 175-point tie between Team Binary Beasts and Indore Hackers to rigorously test the `dense_rank()` behavior of `public.leaderboard_view`.
+
+- **Participant Bulk Import Engine (`scripts/import-participants.ts`):**
+  - Standalone TypeScript script executable directly in Node 22 (`npm run import:participants`).
+  - Securely authenticates via `SUPABASE_SERVICE_ROLE_KEY` loaded from local, gitignored `.env`.
+  - Ingests `participants.csv` (`full_name,email,college,city,phone,team_name`) with RFC 4180-compliant quote parsing and validation.
+  - Automates administrative user creation via `supabase.auth.admin.createUser` with `email_confirm: true` and cryptographically generated 18-character temporary passwords.
+  - Upserts teams into `teams`, updates or provisions `profiles`, and outputs `credentials.csv` (`email,temp_password`) for physical/email distribution.
+  - Implements `--dry-run` simulation mode, exponential backoff for Supabase rate-limits, malformed row quarantine, and terminal audit summaries.
+  - `.gitignore` and `.prettierignore` hardened to ensure `credentials.csv` and `participants.csv` can never be committed.
+
+- **Organizer Account Provisioning (`scripts/create-organizer.ts`):**
+  - Direct administrative tool (`npm run create:organizer`) to create or elevate organizer accounts with `role = 'organizer'`.
+  - Supports CLI arguments (`--email`, `--name`, `--password`) and environment fallbacks.
+
+- **Comprehensive Administrative Guide (`docs/ADMIN.md`):**
+  - Documents database migration execution, seed data loading, service-role credential security, CSV schema requirements, troubleshooting, and production deployment checklists.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary

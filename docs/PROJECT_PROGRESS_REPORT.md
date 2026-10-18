@@ -7,7 +7,7 @@
 **Backend & Database:** Supabase (PostgreSQL with RLS, Realtime & Custom Storage Adapter)  
 **Monitoring & Error Reporting:** Sentry for React Native (`@sentry/react-native`)  
 **CI/CD Pipeline:** GitHub Actions & EAS Build  
-**Status:** Phase 1, 2 & Database Schema Complete (Engineering Foundations, Architecture, Security, Theming, Navigation, Testing & Supabase Schema)  
+**Status:** Phase 1, 2, Database Schema, Auth & Core Event Features Complete (Schedule, Announcements, & Live Dashboard)  
 **Last Updated:** October 2026
 
 ---
@@ -323,7 +323,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - Cache clearance: On sign-out, both in-memory `queryClient.clear()` and persisted `AsyncStorage` query cache (`PRAYATNA_QUERY_CACHE_V1`) are wiped cleanly, and Sentry user context is unbound.
   - Footer displaying semantic application version and native build numbers from `expo-constants`.
 
-### 4.4 Real-Time Event Features (Schedule, Announcements, & Live Dashboard)
+### 4.12 Real-Time Event Features (Schedule, Announcements, & Live Dashboard)
 
 - **Schedule Feature (`src/features/schedule` & `app/(tabs)/schedule.tsx`):**
   - **Modular Architecture:** Feature-based organization: `api/schedule-api.ts`, `hooks/use-schedule.ts`, `components/ScheduleTimelineItem.tsx`, `components/DaySelector.tsx`, `utils/schedule-helpers.ts`, and `types/index.ts`.

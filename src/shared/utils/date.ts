@@ -283,3 +283,46 @@ export function formatCountdown(
 ): string {
   return getCountdownParts(targetInput, referenceInput).formatted;
 }
+
+/**
+ * Formats a date relative to now / reference date (e.g. "Just now", "5m ago", "2h ago", "3d ago", or "18 Oct 2026").
+ */
+export function formatRelativeTime(
+  dateInput: Date | string | number,
+  referenceInput: Date | string | number = new Date()
+): string {
+  const date = coerceToDate(dateInput);
+  const ref = coerceToDate(referenceInput);
+
+  if (!date || !ref) {
+    return 'Invalid Date';
+  }
+
+  const diffMs = ref.getTime() - date.getTime();
+
+  // If date is slightly in the future (within 10s clock skew) or under 60 seconds ago
+  if (diffMs < 60 * 1000) {
+    if (diffMs < -10 * 1000) {
+      // Future date beyond 10s clock skew: show standard formatted date
+      return formatDateIST(date);
+    }
+    return 'Just now';
+  }
+
+  const minutes = Math.floor(diffMs / (60 * 1000));
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
+
+  const hours = Math.floor(diffMs / (3600 * 1000));
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
+
+  const days = Math.floor(diffMs / (86400 * 1000));
+  if (days < 7) {
+    return `${days}d ago`;
+  }
+
+  return formatDateIST(date);
+}

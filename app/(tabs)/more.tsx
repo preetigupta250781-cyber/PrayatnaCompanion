@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProfileCard, useAuthStore, useProfile } from '@/features/auth';
@@ -9,6 +10,7 @@ import { Button, Card, ErrorState, OfflineBanner, ProfileCardSkeleton, Text } fr
 
 export default function MoreScreen(): React.JSX.Element {
   const theme = useAppTheme();
+  const router = useRouter();
   const { profile, isLoading, isError, error, refetch } = useProfile();
   const { signOut } = useAuthStore();
 
@@ -79,6 +81,35 @@ export default function MoreScreen(): React.JSX.Element {
         ) : (
           <ProfileCardSkeleton />
         )}
+
+        {/* Communications Card */}
+        <Card variant="default" style={styles.resourceCard}>
+          <Text variant="label" style={{ color: theme.colors.textSecondary, marginBottom: 12 }}>
+            COMMUNICATIONS
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => router.push('/announcements')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Announcements feed"
+            accessibilityHint="Navigates to the live announcements screen"
+            style={styles.navRow}
+            activeOpacity={0.7}
+          >
+            <View style={styles.flex1}>
+              <Text variant="body" style={styles.navTitle}>
+                📢 Announcements Feed
+              </Text>
+              <Text variant="caption" style={{ color: theme.colors.textSecondary, marginTop: 2 }}>
+                View urgent alerts and hackathon broadcasts
+              </Text>
+            </View>
+            <Text variant="body" style={{ color: theme.colors.accent, fontWeight: '700' }}>
+              →
+            </Text>
+          </TouchableOpacity>
+        </Card>
 
         {/* Event Resources Card */}
         <Card variant="default" style={styles.resourceCard}>
@@ -157,8 +188,21 @@ const styles = StyleSheet.create({
   },
   resourceCard: {
     marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 16,
     padding: 16,
+  },
+  navRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 44, // Touch target >= 44px
+    paddingVertical: 6,
+  },
+  navTitle: {
+    fontWeight: '700',
+  },
+  flex1: {
+    flex: 1,
   },
   infoRow: {
     flexDirection: 'row',
@@ -169,6 +213,7 @@ const styles = StyleSheet.create({
   },
   signOutContainer: {
     marginBottom: 24,
+    marginTop: 8,
   },
   footer: {
     alignItems: 'center',

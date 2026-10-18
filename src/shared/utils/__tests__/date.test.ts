@@ -5,6 +5,7 @@ import {
   formatDateIST,
   formatDateTimeIST,
   formatInIST,
+  formatRelativeTime,
   formatTimeIST,
   getCountdownParts,
   getNowAndNextEvents,
@@ -265,6 +266,53 @@ describe('Date Utilities (Asia/Kolkata)', () => {
       const parts = getCountdownParts('invalid-date', 'another-invalid');
       expect(parts.isFinished).toBe(true);
       expect(parts.formatted).toBe('00:00:00');
+    });
+  });
+
+  describe('formatRelativeTime', () => {
+    const baseNow = new Date('2026-10-18T12:00:00.000Z');
+
+    it('returns "Just now" for dates within 60 seconds', () => {
+      const tenSecsAgo = new Date(baseNow.getTime() - 10 * 1000);
+      expect(formatRelativeTime(tenSecsAgo, baseNow)).toBe('Just now');
+
+      // Slight future within 10s skew
+      const fiveSecsFuture = new Date(baseNow.getTime() + 5 * 1000);
+      expect(formatRelativeTime(fiveSecsFuture, baseNow)).toBe('Just now');
+    });
+
+    it('returns minutes ago for dates under an hour', () => {
+      const fiveMinsAgo = new Date(baseNow.getTime() - 5 * 60 * 1000);
+      expect(formatRelativeTime(fiveMinsAgo, baseNow)).toBe('5m ago');
+
+      const fiftyNineMinsAgo = new Date(baseNow.getTime() - 59 * 60 * 1000);
+      expect(formatRelativeTime(fiftyNineMinsAgo, baseNow)).toBe('59m ago');
+    });
+
+    it('returns hours ago for dates under 24 hours', () => {
+      const twoHoursAgo = new Date(baseNow.getTime() - 2 * 3600 * 1000);
+      expect(formatRelativeTime(twoHoursAgo, baseNow)).toBe('2h ago');
+
+      const twentyThreeHoursAgo = new Date(baseNow.getTime() - 23 * 3600 * 1000);
+      expect(formatRelativeTime(twentyThreeHoursAgo, baseNow)).toBe('23h ago');
+    });
+
+    it('returns days ago for dates under 7 days', () => {
+      const threeDaysAgo = new Date(baseNow.getTime() - 3 * 86400 * 1000);
+      expect(formatRelativeTime(threeDaysAgo, baseNow)).toBe('3d ago');
+    });
+
+    it('returns formatted IST date for dates 7 days or older, or future dates', () => {
+      const tenDaysAgo = new Date(baseNow.getTime() - 10 * 86400 * 1000);
+      expect(formatRelativeTime(tenDaysAgo, baseNow)).toBe('08 Oct 2026');
+
+      const oneDayFuture = new Date(baseNow.getTime() + 86400 * 1000);
+      expect(formatRelativeTime(oneDayFuture, baseNow)).toBe('19 Oct 2026');
+    });
+
+    it('handles invalid dates gracefully', () => {
+      expect(formatRelativeTime('invalid-date', baseNow)).toBe('Invalid Date');
+      expect(formatRelativeTime(baseNow, 'invalid-ref')).toBe('Invalid Date');
     });
   });
 });

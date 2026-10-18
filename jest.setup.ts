@@ -96,3 +96,23 @@ jest.mock(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('react-native-safe-area-context/jest/mock').default
 );
+
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    canGoBack: jest.fn(() => true),
+    navigate: jest.fn(),
+  })),
+  useSegments: jest.fn(() => ['(tabs)']),
+  useLocalSearchParams: jest.fn(() => ({})),
+  Link: 'Link',
+  Stack: Object.assign(({ children }: { children: React.ReactNode }) => children, {
+    Screen: () => null,
+  }),
+  Tabs: Object.assign(({ children }: { children: React.ReactNode }) => children, {
+    Screen: () => null,
+  }),
+}));

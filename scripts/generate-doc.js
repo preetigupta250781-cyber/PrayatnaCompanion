@@ -571,7 +571,32 @@ function buildDocument() {
                   '(2) Reactive useSession hook providing session state and flash notices (authNotice) for redirect warnings. ' +
                   '(3) TanStack Query useProfile hook joining profiles with teams, auto-enforcing sign-out if a profile row is missing or if the token is revoked/account deleted. ' +
                   '(4) Cold start zero-flicker splash screen pre-verification in app/_layout.tsx ensuring authenticated users transition smoothly to tabs while invalid sessions land on login. ' +
-                  '(5) Account & More Tab (app/(tabs)/more.tsx) with 5-state presentation, ProfileCard displaying participant initials avatar, online badge, team name, and squad code, hackathon Wi-Fi / help desk resources card, native confirmation sign-out dialogs, and cache purging (both in-memory TanStack query cache and persisted AsyncStorage cache) on logout.'
+                  '(5) Account & More Tab (app/(tabs)/more.tsx) with 5-state presentation, ProfileCard displaying participant initials avatar, online badge, team name, and squad code, direct navigation to Announcements Feed, hackathon Wi-Fi / help desk resources card, native confirmation sign-out dialogs, and cache purging (both in-memory TanStack query cache and persisted AsyncStorage cache) on logout.'
+              ),
+            ],
+            spacing: { after: 200 },
+          }),
+
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.10 Real-Time Event Features: Schedule, Announcements, & Live Home Dashboard',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Engineered core interactive event features integrating Supabase Realtime synchronization and authoritative server-corrected time: ' +
+                  '(1) Schedule Timeline (app/(tabs)/schedule.tsx): Segmented control day selector ("All Days", "Day 1", "Day 2", etc.), timeline event list showing IST time range, venue location with pin indicator, and colored chips per event type (ceremony, session, workshop, jamming, judging, meal, other). Live highlight for current active event with glowing border and "LIVE NOW" badge. Server-corrected authoritative time ticking every 30s via useServerNow({ intervalMs: 30000 }) automatically advancing active events. Full handling of midnight-crossing events (visible on both days with a "(+1 Day)" indicator) and concurrent overlapping events. 5-state handling with ScheduleSkeleton, EmptyState, ErrorState with retry, OfflineBanner, and pull-to-refresh. ' +
+                  '(2) Announcements Feed (app/announcements.tsx): Reverse-chronological feed with priority badges (normal, important, urgent with red left border and warning tint), relative timestamps (Just now, 5m ago, 2h ago, 3d ago, or IST date) via formatRelativeTime(), expandable long text with smooth 3-line truncation and accessible toggle button (touch target >= 44px), priority filter chips ("All", "Urgent", "Important"), back navigation, and 5-state handling with AnnouncementListSkeleton. ' +
+                  '(3) Home Overview Dashboard (app/(tabs)/index.tsx): Welcomes participant by first name (useProfile), displaying team name and squad code. "Happening Now / Up Next" hero card with live IST event time, category badge, location, and high-visibility countdown timer updating every second via useServerNow({ intervalMs: 1000 }). Latest 3 announcements preview with immediate shortcut ("View all →") to full announcements feed. Zero-layout-shift HomeSkeleton loading state and multi-resource pull-to-refresh. ' +
+                  '(4) Realtime Synchronization: Subscribed to schedule_events and announcements tables with automatic query cache invalidation on inserts, updates, and deletes.'
               ),
             ],
             spacing: { after: 200 },
@@ -636,7 +661,7 @@ function buildDocument() {
                   createDataCell('npm run test:ci', 25, true),
                   createDataCell('PASSED', 15, true, true),
                   createDataCell(
-                    '29 test suites passed, 224/224 tests green. > 80% coverage.',
+                    '40 test suites passed, 278/278 tests green. > 80% coverage.',
                     35,
                     true
                   ),
@@ -683,20 +708,20 @@ function buildDocument() {
               }),
               new TableRow({
                 children: [
-                  createDataCell('src/features/ (Domain Schemas, Auth)', 30, false, true),
-                  createDataCell('97.46%', 17),
-                  createDataCell('82.35%', 17),
-                  createDataCell('96.66%', 18),
-                  createDataCell('97.26%', 18),
+                  createDataCell('src/features/ (Schedule, Announcements, Auth)', 30, false, true),
+                  createDataCell('95.78%', 17),
+                  createDataCell('84.15%', 17),
+                  createDataCell('94.73%', 18),
+                  createDataCell('95.80%', 18),
                 ],
               }),
               new TableRow({
                 children: [
                   createDataCell('src/shared/hooks/ (Theme, Server Time)', 30, true, true),
-                  createDataCell('93.75%', 17, true),
-                  createDataCell('75.00%', 17, true),
+                  createDataCell('96.87%', 17, true),
+                  createDataCell('87.50%', 17, true),
                   createDataCell('92.85%', 18, true),
-                  createDataCell('93.10%', 18, true),
+                  createDataCell('96.55%', 18, true),
                 ],
               }),
               new TableRow({
@@ -720,8 +745,8 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('src/shared/utils/ (Asia/Kolkata Date)', 30, false, true),
-                  createDataCell('98.94%', 17),
-                  createDataCell('89.23%', 17),
+                  createDataCell('99.12%', 17),
+                  createDataCell('90.00%', 17),
                   createDataCell('100%', 18),
                   createDataCell('100%', 18),
                 ],
@@ -729,10 +754,10 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('All Monitored Codebase Files', 30, true, true),
-                  createDataCell('95.19%', 17, true, true),
-                  createDataCell('86.19%', 17, true, true),
-                  createDataCell('92.77%', 18, true, true),
-                  createDataCell('95.64%', 18, true, true),
+                  createDataCell('95.26%', 17, true, true),
+                  createDataCell('87.24%', 17, true, true),
+                  createDataCell('93.12%', 18, true, true),
+                  createDataCell('95.65%', 18, true, true),
                 ],
               }),
             ],

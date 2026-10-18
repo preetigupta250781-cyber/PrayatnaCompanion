@@ -317,10 +317,44 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 - **Account & More Tab (`app/(tabs)/more.tsx`):**
   - 5-state presentation: Loading (skeleton), Error (with retry), and Success (ProfileCard).
   - `ProfileCard`: Displays participant initials avatar, online badge, full name, email, role chip (`PARTICIPANT` / `ORGANIZER`), college name with city, and team name with squad code.
+  - Quick navigation row: Direct access to the live Announcements Feed (`/announcements`).
   - Hackathon resources card: Event Wi-Fi SSID, passcode, and physical help desk location.
   - Sign Out button triggering platform-specific confirmation dialogs (`Alert.alert` on native, `window.confirm` on web).
   - Cache clearance: On sign-out, both in-memory `queryClient.clear()` and persisted `AsyncStorage` query cache (`PRAYATNA_QUERY_CACHE_V1`) are wiped cleanly, and Sentry user context is unbound.
   - Footer displaying semantic application version and native build numbers from `expo-constants`.
+
+### 4.4 Real-Time Event Features (Schedule, Announcements, & Live Dashboard)
+
+- **Schedule Feature (`src/features/schedule` & `app/(tabs)/schedule.tsx`):**
+  - **Modular Architecture:** Feature-based organization: `api/schedule-api.ts`, `hooks/use-schedule.ts`, `components/ScheduleTimelineItem.tsx`, `components/DaySelector.tsx`, `utils/schedule-helpers.ts`, and `types/index.ts`.
+  - **Segmented Control Day Tabs:** Dynamic day switcher ("All Days", "Day 1", "Day 2", etc.) built with accessible touch-friendly pills (>= 44px).
+  - **Timeline Cards (`ScheduleTimelineItem`):** Formatted time range in IST (`Asia/Kolkata`), location with pin indicator, title, description, and colored badges mapped per event type (`ceremony`, `session`, `workshop`, `jamming`, `judging`, `meal`, `other`).
+  - **Live Event Highlighting:** Automatically highlights active events (`starts_at <= now < ends_at`) with high-contrast accent borders, subtle tint, and "LIVE NOW" badge.
+  - **Authoritative Time Advancing:** Integrates `useServerNow({ intervalMs: 30000 })` to re-evaluate active and upcoming events every 30 seconds against server-corrected time without requiring manual reload.
+  - **Midnight-Crossing Events:** Full support for events starting before midnight and continuing into the next morning; displayed on both starting and finishing days with a clear `(+1 Day)` indicator.
+  - **Overlapping Events:** Handles multiple concurrent sessions seamlessly without dropping or hiding items.
+  - **5-State Architecture:** Loading renders `ScheduleSkeleton`, empty state renders `EmptyState`, network issues render `ErrorState` with retry, offline state shows `OfflineBanner`, and pull-to-refresh enables instant re-synchronization.
+
+- **Announcements Feature (`src/features/announcements` & `app/announcements.tsx`):**
+  - **Modular Architecture:** `api/announcements-api.ts`, `hooks/use-announcements.ts`, `components/AnnouncementCard.tsx`, `utils/announcement-helpers.ts`, and `types/index.ts`.
+  - **Reverse Chronological Feed:** Automatically sorted by publication date descending (`created_at`).
+  - **Priority Badging & Urgent Elevation:** Priority levels (`urgent`, `important`, `normal`). Urgent announcements are visually highlighted with prominent red left borders, high-contrast badges, and tinted backgrounds.
+  - **Relative Timestamps:** Real-time relative formatting (`Just now`, `5m ago`, `2h ago`, `3d ago`, or formatted IST date for older items) via `formatRelativeTime()`.
+  - **Expandable Long Text:** Announcements with bodies exceeding 120 characters feature a smooth 3-line truncation with an accessible "Read more ▼" / "Show less ▲" toggle button (touch target >= 44px).
+  - **Dedicated Screen & Navigation:** Screen registered in Root Stack and accessible from both Home overview and More tab. Includes back button navigation and priority filter chips ("All", "Urgent", "Important").
+  - **5-State Architecture:** Screen state management using `AnnouncementListSkeleton`, `EmptyState`, and `ErrorState` with pull-to-refresh.
+
+- **Home Overview Dashboard (`app/(tabs)/index.tsx`):**
+  - **Personalized Header:** Welcomes participant by first name (`useProfile`), accompanied by team name and squad code.
+  - **"Happening Now / Up Next" Hero Card:**
+    - If an event is currently active: Displays event title, IST time range, venue location, category badge, and countdown to the next upcoming session.
+    - If between events: Displays "UP NEXT" badge, event details, and high-visibility countdown timer updating every second via `useServerNow({ intervalMs: 1000 })`.
+    - If all daily events concluded: Friendly completion banner encouraging project hacking.
+  - **Latest Announcements Section:** Previews the top 3 latest announcements with an immediate navigation shortcut ("View all →") to the full announcements feed.
+  - **Zero-Layout-Shift Loading:** Matches layout precisely with `HomeSkeleton`. Multi-resource pull-to-refresh updates profile, schedule, and announcements simultaneously.
+
+- **Supabase Realtime Synchronization:**
+  - Automated cache invalidation on database change notifications (`INSERT`, `UPDATE`, `DELETE`) for `schedule_events` and `announcements` tables via `useTableRealtime()`, with automatic fallback to 30s polling if socket connectivity drops.
 
 ---
 
@@ -331,7 +365,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 29 test suites passed, 224/224 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 40 test suites passed, 278/278 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
@@ -339,26 +373,24 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 
 | Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
 | -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
-| `src/features/`            | 97.46%       | 82.35%     | 96.66%      | 97.26%     | **Exceeds 80%** |
-| `src/shared/hooks/`        | 93.75%       | 75.00%     | 92.85%      | 93.10%     | **Exceeds 80%** |
+| `src/features/`            | 95.78%       | 84.15%     | 94.73%      | 95.80%     | **Exceeds 80%** |
+| `src/shared/hooks/`        | 96.87%       | 87.50%     | 92.85%      | 96.55%     | **Exceeds 80%** |
 | `src/shared/lib/`          | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
 | `src/shared/ui/`           | 94.84%       | 86.33%     | 100%        | 95.93%     | **Exceeds 80%** |
-| `src/shared/utils/`        | 98.94%       | 89.23%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **95.19%**   | **86.19%** | **92.77%**  | **95.64%** | **PASSED**      |
+| `src/shared/utils/`        | 99.12%       | 90.00%     | 100%        | 100%       | **Exceeds 80%** |
+| **All Monitored Files**    | **95.26%**   | **87.24%** | **93.12%**  | **95.65%** | **PASSED**      |
 
 ---
 
 ## 6. Strategic Roadmap for Subsequent Phases
 
-- **Phase 3 (Data Layer & Supabase API Integration):**
-  - Implement Supabase database queries in `src/features/<feature>/api/` files.
-  - Expose queries through custom TanStack Query hooks in `src/features/<feature>/hooks/`.
-  - Validate all inbound network payloads with Zod schemas and derive types from schemas.
-- **Phase 4 (Live Real-Time Subscriptions):**
-  - Enable Supabase Realtime WebSocket listeners for instant leaderboard updates.
-  - Implement real-time broadcast alerts and announcements.
-- **Phase 5 (Venue Navigation & Offline Support):**
-  - Integrate `react-native-maps` with offline caching for campus navigation.
-  - Offline mode with NetInfo + AsyncStorage fallback.
+- **Phase 3 (Problem Statements & Submission Tracks):**
+  - Implement problem statement listings with release countdowns and difficulty tags.
+  - Track-specific filtering and detailed view screens.
+- **Phase 4 (Live Real-Time Leaderboard):**
+  - Round-based leaderboard with podium top 3 display and tie handling.
+  - Real-time score publication synchronization via Supabase Realtime.
+- **Phase 5 (Campus Logistics & Transit):**
+  - Campus bus route schedules, stops, and route visualization.
 - **Phase 6 (EAS Cloud Build & Store Submission):**
   - Trigger EAS cloud builds for Android (`.apk` / `.aab`) and iOS (`.ipa`).

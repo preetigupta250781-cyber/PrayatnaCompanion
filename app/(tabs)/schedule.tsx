@@ -1,179 +1,142 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+import {
+  DayOption,
+  DaySelector,
+  filterEventsByDay,
+  isEventActive,
+  ScheduleTimelineItem,
+  useSchedule,
+} from '@/features/schedule';
+import { useServerNow } from '@/shared/hooks/use-server-now';
 import { useAppTheme } from '@/shared/hooks/use-theme';
-
-interface ScheduleItem {
-  id: string;
-  time: string;
-  title: string;
-  description: string;
-  status: 'completed' | 'current' | 'upcoming';
-}
-
-const SCHEDULE_ITEMS: ScheduleItem[] = [
-  {
-    id: '1',
-    time: '09:00 AM',
-    title: 'Registration & Team Check-In',
-    description: 'Collect your hacker badge, Wi-Fi credentials, and swag bag at the front desk.',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    time: '10:30 AM',
-    title: 'Opening Ceremony & Theme Reveal',
-    description: 'Welcome keynote and presentation of problem statements by industry sponsors.',
-    status: 'completed',
-  },
-  {
-    id: '3',
-    time: '11:30 AM',
-    title: 'Hacking Commences',
-    description: '24-hour hackathon timer starts. Teams begin building their solutions.',
-    status: 'current',
-  },
-  {
-    id: '4',
-    time: '04:00 PM',
-    title: 'Mentorship Checkpoint 1',
-    description: 'Domain experts available for technical reviews and architectural feedback.',
-    status: 'upcoming',
-  },
-  {
-    id: '5',
-    time: '09:00 PM',
-    title: 'Midnight Energy & Mini-Games',
-    description: 'Snacks, caffeine boost, and quick trivia challenges in the main arena.',
-    status: 'upcoming',
-  },
-  {
-    id: '6',
-    time: '11:30 AM (Day 2)',
-    title: 'Code Freeze & Project Submission',
-    description: 'All repositories and project demo videos must be submitted via the portal.',
-    status: 'upcoming',
-  },
-];
+import { EmptyState, ScheduleSkeleton, ScreenState, Text } from '@/shared/ui';
+import { groupEventsByDay } from '@/shared/utils/date';
 
 export default function ScheduleScreen(): React.JSX.Element {
   const theme = useAppTheme();
+  const { events, isLoading, isError, error, refetch, isRefetching } = useSchedule();
+  // Auto-advance authoritative server-corrected time every 30 seconds
+  const serverNow = useServerNow({ intervalMs: 30000 });
+
+  const [selectedDayKey, setSelectedDayKey] = useState<string>('all');
+
+  // Compute available days from loaded events
+  const dayOptions: DayOption[] = useMemo(() => {
+    if (events.length === 0) return [];
+    const groups = groupEventsByDay(events, (e) => e.starts_at);
+    const options: DayOption[] = [{ key: 'all', label: 'All Days' }];
+
+    for (const group of groups) {
+      options.push({
+        key: group.dateKey,
+        label: group.dayLabel,
+      });
+    }
+
+    return options;
+  }, [events]);
+
+  // Filter events based on selected tab (handling midnight-crossing events)
+  const filteredEvents = useMemo(() => {
+    return filterEventsByDay(events, selectedDayKey);
+  }, [events, selectedDayKey]);
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.content}
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
+      edges={['top', 'left', 'right']}
     >
-      <Text style={[styles.title, { color: theme.colors.text }]}>Schedule</Text>
-      <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-        Prayatna 2026 24-Hour Timeline. All times in Indian Standard Time (IST).
-      </Text>
+      <View style={styles.header}>
+        <Text variant="h1" style={styles.title}>
+          Schedule
+        </Text>
+        <Text variant="bodySm" style={{ color: theme.colors.textSecondary }}>
+          Prayatna 2026 Timeline • Indian Standard Time (IST)
+        </Text>
 
-      <View style={styles.timeline}>
-        {SCHEDULE_ITEMS.map((item) => {
-          const isCurrent = item.status === 'current';
-          const isCompleted = item.status === 'completed';
-
-          return (
-            <View
-              key={item.id}
-              style={[
-                styles.itemCard,
-                {
-                  backgroundColor: theme.colors.card,
-                  borderColor: isCurrent ? theme.colors.accent : theme.colors.cardBorder,
-                },
-              ]}
-            >
-              <View style={styles.itemHeader}>
-                <Text
-                  style={[
-                    styles.timeText,
-                    {
-                      color: isCurrent
-                        ? theme.colors.accent
-                        : isCompleted
-                          ? theme.colors.textMuted
-                          : theme.colors.textSecondary,
-                    },
-                  ]}
-                >
-                  {item.time}
-                </Text>
-                {isCurrent && (
-                  <View style={[styles.nowBadge, { backgroundColor: theme.colors.accentMuted }]}>
-                    <Text style={[styles.nowBadgeText, { color: theme.colors.accent }]}>
-                      LIVE NOW
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <Text style={[styles.itemTitle, { color: theme.colors.text }]}>{item.title}</Text>
-              <Text style={[styles.itemDesc, { color: theme.colors.textSecondary }]}>
-                {item.description}
-              </Text>
-            </View>
-          );
-        })}
+        {dayOptions.length > 0 && (
+          <DaySelector
+            days={dayOptions}
+            selectedKey={selectedDayKey}
+            onSelectDay={setSelectedDayKey}
+          />
+        )}
       </View>
-    </ScrollView>
+
+      <ScreenState
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => {
+          void refetch();
+        }}
+        skeleton={<ScheduleSkeleton />}
+        isEmpty={events.length === 0}
+        emptyProps={{
+          title: 'No Events Scheduled',
+          message: 'The hackathon schedule will be announced here shortly.',
+        }}
+        style={styles.screenStateContainer}
+      >
+        {filteredEvents.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <EmptyState
+              title="No Events On This Day"
+              message="There are no sessions, workshops, or deadlines scheduled for this day."
+            />
+          </View>
+        ) : (
+          <FlatList
+            data={filteredEvents}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ScheduleTimelineItem event={item} isCurrent={isEventActive(item, serverNow)} />
+            )}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={() => {
+                  void refetch();
+                }}
+                tintColor={theme.colors.accent}
+                colors={[theme.colors.accent]}
+              />
+            }
+          />
+        )}
+      </ScreenState>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
   },
-  content: {
-    padding: 20,
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-    marginBottom: 24,
-  },
-  timeline: {
-    gap: 12,
-  },
-  itemCard: {
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  timeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  nowBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  nowBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: '700',
     marginBottom: 4,
   },
-  itemDesc: {
-    fontSize: 13,
-    lineHeight: 18,
+  screenStateContainer: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 32,
+  },
+  emptyContainer: {
+    flex: 1,
+    paddingTop: 32,
+    paddingHorizontal: 20,
   },
 });

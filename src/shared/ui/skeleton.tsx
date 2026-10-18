@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Animated, StyleSheet, ViewStyle } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, ViewStyle } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
@@ -17,31 +24,21 @@ export function Skeleton({
   style,
 }: SkeletonProps): React.JSX.Element {
   const theme = useAppTheme();
-  // Safe stable animated value initialization for React Compiler in React 19
-  const [opacityAnim] = useState(() => new Animated.Value(0.3));
+  const shouldReduceMotion = useReducedMotion();
+  const opacity = useSharedValue(0.35);
 
   useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacityAnim, {
-          toValue: 0.7,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0.3,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
+    if (shouldReduceMotion) {
+      opacity.value = 0.5;
+      return;
+    }
 
-    animation.start();
+    opacity.value = withRepeat(withTiming(0.85, { duration: 850 }), -1, true);
+  }, [opacity, shouldReduceMotion]);
 
-    return () => {
-      animation.stop();
-    };
-  }, [opacityAnim]);
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
 
   return (
     <Animated.View
@@ -52,8 +49,8 @@ export function Skeleton({
           height,
           borderRadius,
           backgroundColor: theme.colors.surfaceHighlight,
-          opacity: opacityAnim,
         },
+        animatedStyle,
         style,
       ]}
       accessible={false}

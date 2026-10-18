@@ -221,6 +221,44 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 - **Comprehensive Administrative Guide (`docs/ADMIN.md`):**
   - Documents database migration execution, seed data loading, service-role credential security, CSV schema requirements, troubleshooting, and production deployment checklists.
 
+### 4.9. Themeable Design System (`src/shared/ui/`) & Composed Skeletons
+
+- **Core Themeable Design System:**
+  - **`Text` (`src/shared/ui/text.tsx`):** Implements 9 typography variants (`h1`, `h2`, `h3`, `h4`, `body`, `bodySm`, `caption`, `label`, `code`) integrated with theme tokens (`typography.fontSizes`, `typography.lineHeights`, `typography.fontWeights`), dynamic font scaling (`allowFontScaling={true}`), and semantic color resolution.
+  - **`Button` (`src/shared/ui/button.tsx`):** 5 visual variants (`primary` with neon glow, `secondary` elevated surface, `ghost` borderless, `outline` accent-bordered, `danger` error-styled). Enforces $\ge 44$px touch targets (`minHeight: 48`), loading state with layout preservation, disabled states, haptic feedback, and accessible roles.
+  - **`Card` (`src/shared/ui/card.tsx`):** 4 container variants (`default`, `elevated` with native shadows, `outlined`, `glow` with neon halo) supporting interactive press handling with haptics.
+  - **`Badge` & `Chip` (`src/shared/ui/badge.tsx`, `chip.tsx`):** Pill-shaped status and counter badges (`default`, `accent`, `success`, `warning`, `error`, `outline`, `muted`), plus interactive filter chips with selection states and removal handlers.
+  - **`Input` (`src/shared/ui/input.tsx`):** Form field component featuring focus rings, error states with accessible alerts, helper text, left/right icon slots, and $\ge 48$px touch targets.
+  - **`Avatar` (`src/shared/ui/avatar.tsx`):** Circular avatar supporting image URLs with network error fallbacks, two-letter initials calculation from participant names, customizable sizes (`xs` to `xl`), and live presence status dots (`online`, `busy`, `away`, `offline`).
+  - **`Divider` (`src/shared/ui/divider.tsx`):** Orientation-flexible rules with optional centered badge text labels.
+  - **`BottomSheet` (`src/shared/ui/bottom-sheet.tsx`):** Slide-up modal sheet with dimmed backdrop tap dismissal, top drag handle indicator, header row, and accessibility modal containment.
+
+- **Reanimated Shimmer Skeletons:**
+  - **`Skeleton` Primitive (`src/shared/ui/skeleton.tsx`):** Driven by `react-native-reanimated` with `useReducedMotion()`. Smoothly animates a continuous opacity shimmer in normal mode and freezes gracefully into a static placeholder when reduced motion is enabled on the device.
+  - **7 Composed Layout Skeletons (`src/shared/ui/composed-skeletons.tsx`):**
+    1. `HomeSkeleton`: Hero countdown banner, live stats, announcements preview, problem track cards.
+    2. `ScheduleSkeleton`: Day tabs, vertical timeline track with dot indicators and event cards.
+    3. `AnnouncementListSkeleton`: Filter chips, announcement cards with priority badges and metadata.
+    4. `ProblemCardSkeleton`: Track tag, difficulty badge, title, description lines, submission status pill.
+    5. `LeaderboardSkeleton`: 3-tier podium (Rank 1 center gold, Rank 2 left silver, Rank 3 right bronze) + row cards.
+    6. `BusRouteListSkeleton`: Route selector tabs, departure card, sequenced transit timeline stops.
+    7. `ProfileCardSkeleton`: 72px avatar header, role badge, team membership card, academic details.
+
+- **5-State Screen Architecture Contract:**
+  - **`EmptyState` (`src/shared/ui/empty-state.tsx`):** Contextual glyph, friendly title, message, and customizable action button.
+  - **`ErrorState` (`src/shared/ui/error-state.tsx`):** Alert styling, clear explanation, and primary RETRY action.
+  - **`OfflineBanner` (`src/shared/ui/offline-banner.tsx`):** Subscribed to `@react-native-community/netinfo` to automatically display connectivity warnings when offline.
+  - **`ScreenState` (`src/shared/ui/screen-state.tsx`):** Generic TanStack Query wrapper taking a query result or explicit flags, orchestrating:
+    1. Loading $\rightarrow$ skeleton
+    2. Error $\rightarrow$ ErrorState with `refetch()`
+    3. Empty $\rightarrow$ EmptyState
+    4. Offline $\rightarrow$ OfflineBanner + cached data
+    5. Success $\rightarrow$ children (or render function taking typed data).
+
+- **Developer UI Kit Screen (`app/dev/ui-kit.tsx`):**
+  - Interactive component catalog demonstrating all variants, inputs, avatars, bottom sheet, skeletons, and the 5-state testbed.
+  - Protected by `__DEV__` guard (displays 404 in production builds).
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -230,7 +268,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 10 test suites passed, 60/60 tests passed. $\ge 80\%$ coverage threshold met.       |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 19 test suites passed, 117/117 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
@@ -241,9 +279,9 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | `src/features/`            | 100%         | 100%       | 100%        | 100%       | **Exceeds 80%** |
 | `src/shared/hooks/`        | 100%         | 100%       | 100%        | 100%       | **Exceeds 80%** |
 | `src/shared/lib/`          | 95.52%       | 83.33%     | 70.83%      | 96.00%     | **Exceeds 80%** |
-| `src/shared/ui/`           | 100%         | 72.72%     | 100%        | 100%       | **Exceeds 80%** |
+| `src/shared/ui/`           | 94.44%       | 83.81%     | 100%        | 95.52%     | **Exceeds 80%** |
 | `src/shared/utils/`        | 100%         | 95.83%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **97.27%**   | **83.67%** | **85.10%**  | **97.60%** | **PASSED**      |
+| **All Monitored Files**    | **95.32%**   | **84.69%** | **91.95%**  | **96.11%** | **PASSED**      |
 
 ---
 

@@ -41,3 +41,37 @@ jest.mock('expo-secure-store', () => {
     __store: store,
   };
 });
+
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View, Text } = require('react-native');
+
+  return {
+    __esModule: true,
+    default: {
+      View,
+      Text,
+      createAnimatedComponent: (comp: unknown): unknown => comp,
+    },
+    useSharedValue: (init: unknown): { value: unknown } => ({ value: init }),
+    useAnimatedStyle: <T>(fn: () => T): T => fn(),
+    useReducedMotion: jest.fn(() => false),
+    withRepeat: <T>(anim: T): T => anim,
+    withTiming: <T>(toValue: T): T => toValue,
+    withSpring: <T>(toValue: T): T => toValue,
+    withSequence: <T>(...anims: T[]): T | undefined => anims[0],
+    useDerivedValue: <T>(fn: () => T): { value: T } => ({ value: fn() }),
+    interpolate: jest.fn(),
+    Extrapolation: { CLAMP: 'clamp' },
+  };
+});
+
+// Mock @react-native-community/netinfo
+
+jest.mock('@react-native-community/netinfo', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('@react-native-community/netinfo/jest/netinfo-mock.js')
+);

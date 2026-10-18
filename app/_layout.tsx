@@ -77,8 +77,9 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
     if (!isInitialized) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inDevGroup = segments[0] === 'dev';
 
-    if (!session && !inAuthGroup) {
+    if (!session && !inAuthGroup && !inDevGroup) {
       router.replace('/(auth)/login');
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)');
@@ -103,6 +104,7 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="dev/ui-kit" options={{ headerShown: false }} />
       </Stack>
     </View>
   );

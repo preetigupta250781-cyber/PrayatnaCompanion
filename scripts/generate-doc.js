@@ -498,6 +498,29 @@ function buildDocument() {
                   'Built administrative CLI scripts scripts/import-participants.ts (bulk participant provisioning, team upserts, temporary password generation, rate limiting, and credentials.csv export) and scripts/create-organizer.ts (direct organizer provisioning), documented thoroughly in docs/ADMIN.md.'
               ),
             ],
+            spacing: { after: 140 },
+          }),
+
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.7 Themeable Design System, Composed Skeletons & ScreenState',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Developed a full themeable design system in src/shared/ui/ including Text (9 typography variants with dynamic font scaling), Button (primary, secondary, ghost, outline, danger with loading spinner and disabled states), Card (default, elevated, outlined, glow with haptics), Badge & Chip (semantic pill badges and selectable filter chips), Input (focus rings, error alerts, helper texts), Avatar (initials generation, presence status dots), Divider (horizontal, vertical, and labeled), and BottomSheet (slide-up dialog with gesture backdrop dismiss). ' +
+                  'Engineered a Reanimated shimmer Skeleton primitive respecting device reduce-motion settings, along with 7 composed skeletons matching exact production layouts (Home, Schedule, Announcements, Problems, Leaderboard podium, Transit, Profile). ' +
+                  'Standardized the 5-State Architecture through ScreenState coordinating TanStack Query results, ErrorState with refetch, EmptyState with custom actions, and NetInfo-driven OfflineBanner. Included an isolated developer-only preview screen app/dev/ui-kit.tsx.'
+              ),
+            ],
             spacing: { after: 200 },
           }),
 
@@ -560,7 +583,7 @@ function buildDocument() {
                   createDataCell('npm run test:ci', 25, true),
                   createDataCell('PASSED', 15, true, true),
                   createDataCell(
-                    '10 test suites passed, 60/60 tests green. > 80% coverage.',
+                    '19 test suites passed, 117/117 tests green. > 80% coverage.',
                     35,
                     true
                   ),
@@ -634,11 +657,11 @@ function buildDocument() {
               }),
               new TableRow({
                 children: [
-                  createDataCell('src/shared/ui/ (5 States, Skeletons, Errors)', 30, true, true),
-                  createDataCell('100%', 17, true),
-                  createDataCell('72.72%', 17, true),
+                  createDataCell('src/shared/ui/ (Design System & Skeletons)', 30, true, true),
+                  createDataCell('94.44%', 17, true),
+                  createDataCell('83.81%', 17, true),
                   createDataCell('100%', 18, true),
-                  createDataCell('100%', 18, true),
+                  createDataCell('95.52%', 18, true),
                 ],
               }),
               new TableRow({
@@ -653,10 +676,10 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('All Monitored Codebase Files', 30, true, true),
-                  createDataCell('97.27%', 17, true, true),
-                  createDataCell('83.67%', 17, true, true),
-                  createDataCell('85.10%', 18, true, true),
-                  createDataCell('97.60%', 18, true, true),
+                  createDataCell('95.32%', 17, true, true),
+                  createDataCell('84.69%', 17, true, true),
+                  createDataCell('91.95%', 18, true, true),
+                  createDataCell('96.11%', 18, true, true),
                 ],
               }),
             ],

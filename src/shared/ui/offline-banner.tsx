@@ -1,16 +1,32 @@
+import { useNetInfo } from '@react-native-community/netinfo';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export interface OfflineBannerProps {
   message?: string;
+  isOffline?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function OfflineBanner({
   message = 'You are currently offline. Showing cached event data.',
-}: OfflineBannerProps): React.JSX.Element {
+  isOffline,
+  style,
+}: OfflineBannerProps): React.JSX.Element | null {
   const theme = useAppTheme();
+  const netInfo = useNetInfo();
+
+  // If isOffline is explicitly passed, honor it; otherwise inspect NetInfo state
+  const isDisconnected =
+    isOffline !== undefined
+      ? isOffline
+      : netInfo.isConnected === false || netInfo.isInternetReachable === false;
+
+  if (!isDisconnected) {
+    return null;
+  }
 
   return (
     <View
@@ -20,6 +36,7 @@ export function OfflineBanner({
           backgroundColor: theme.colors.surfaceElevated,
           borderBottomColor: theme.colors.warning,
         },
+        style,
       ]}
       accessible={true}
       accessibilityRole="alert"

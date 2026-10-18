@@ -1,168 +1,177 @@
+import Constants from 'expo-constants';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '@/features/auth';
+import { ProfileCard, useAuthStore, useProfile } from '@/features/auth';
 import { useAppTheme } from '@/shared/hooks/use-theme';
+import { Button, Card, ErrorState, OfflineBanner, ProfileCardSkeleton, Text } from '@/shared/ui';
 
 export default function MoreScreen(): React.JSX.Element {
   const theme = useAppTheme();
-  const { user, signOut } = useAuthStore();
+  const { profile, isLoading, isError, error, refetch } = useProfile();
+  const { signOut } = useAuthStore();
 
-  const handleSignOut = (): void => {
-    void signOut();
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+  const buildNumber =
+    Constants.expoConfig?.android?.versionCode?.toString() ??
+    Constants.expoConfig?.ios?.buildNumber ??
+    '1';
+
+  const handleSignOutPress = (): void => {
+    if (Platform.OS === 'web') {
+      // Web alert fallback
+      const confirmed =
+        typeof window !== 'undefined' && typeof window.confirm === 'function'
+          ? window.confirm('Are you sure you want to sign out of Prayatna Companion?')
+          : true;
+      if (confirmed) {
+        void signOut();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out of Prayatna Companion?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: () => {
+            void signOut();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.content}
-    >
-      <Text style={[styles.title, { color: theme.colors.text }]}>Settings & Info</Text>
-      <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-        Event resources, network details, and account configuration.
-      </Text>
-
-      {/* Account Info Card */}
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: theme.colors.card,
-            borderColor: theme.colors.cardBorder,
-          },
-        ]}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+      <OfflineBanner />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.cardHeader, { color: theme.colors.textSecondary }]}>
-          CURRENT SESSION
+        {/* Title */}
+        <Text variant="h1" style={styles.screenTitle}>
+          More & Account
         </Text>
-        <Text style={[styles.userName, { color: theme.colors.text }]}>
-          {user?.email ?? 'Authenticated Hacker'}
-        </Text>
-        <Text style={[styles.userRole, { color: theme.colors.accent }]}>Role: Participant</Text>
-      </View>
-
-      {/* Venue & Network Card */}
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: theme.colors.card,
-            borderColor: theme.colors.cardBorder,
-          },
-        ]}
-      >
-        <Text style={[styles.cardHeader, { color: theme.colors.textSecondary }]}>
-          EVENT RESOURCES
+        <Text variant="body" style={{ color: theme.colors.textSecondary, marginBottom: 20 }}>
+          Manage your participant profile, hackathon credentials, and app preferences.
         </Text>
 
-        <View style={styles.resourceRow}>
-          <Text style={[styles.resourceLabel, { color: theme.colors.textSecondary }]}>
-            Hacker Wi-Fi:
+        {/* 5-State Profile Presentation */}
+        {isLoading ? (
+          <ProfileCardSkeleton />
+        ) : isError ? (
+          <ErrorState
+            message={error?.userMessage ?? 'Unable to load your participant profile.'}
+            onRetry={() => {
+              void refetch();
+            }}
+          />
+        ) : profile ? (
+          <ProfileCard profile={profile} />
+        ) : (
+          <ProfileCardSkeleton />
+        )}
+
+        {/* Event Resources Card */}
+        <Card variant="default" style={styles.resourceCard}>
+          <Text variant="label" style={{ color: theme.colors.textSecondary, marginBottom: 12 }}>
+            HACKATHON RESOURCES
           </Text>
-          <Text style={[styles.resourceValue, { color: theme.colors.text }]}>
-            Prayatna_Hacks_5G
-          </Text>
+
+          <View style={[styles.infoRow, { borderBottomColor: theme.colors.border }]}>
+            <Text variant="bodySm" style={{ color: theme.colors.textSecondary }}>
+              Hacker Wi-Fi
+            </Text>
+            <Text variant="bodySm" style={{ fontWeight: '700' }}>
+              Prayatna_Hacks_5G
+            </Text>
+          </View>
+
+          <View style={[styles.infoRow, { borderBottomColor: theme.colors.border }]}>
+            <Text variant="bodySm" style={{ color: theme.colors.textSecondary }}>
+              Wi-Fi Passcode
+            </Text>
+            <Text variant="bodySm" style={{ fontWeight: '700' }}>
+              buildthefuture26
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text variant="bodySm" style={{ color: theme.colors.textSecondary }}>
+              Help Desk
+            </Text>
+            <Text variant="bodySm" style={{ fontWeight: '700' }}>
+              Hall 4B, Innovation Lab
+            </Text>
+          </View>
+        </Card>
+
+        {/* Sign Out Button with Confirmation */}
+        <View style={styles.signOutContainer}>
+          <Button
+            title="SIGN OUT"
+            variant="danger"
+            size="lg"
+            fullWidth
+            onPress={handleSignOutPress}
+            accessibilityLabel="Sign out button"
+            accessibilityHint="Opens confirmation dialog to sign out of the app"
+          />
         </View>
 
-        <View style={styles.resourceRow}>
-          <Text style={[styles.resourceLabel, { color: theme.colors.textSecondary }]}>
-            Wi-Fi Passcode:
+        {/* App Version & Build Footer */}
+        <View style={styles.footer}>
+          <Text variant="caption" style={{ color: theme.colors.textMuted }}>
+            {`Prayatna Companion v${appVersion} (Build ${buildNumber})`}
           </Text>
-          <Text style={[styles.resourceValue, { color: theme.colors.text }]}>buildthefuture26</Text>
-        </View>
-
-        <View style={styles.resourceRow}>
-          <Text style={[styles.resourceLabel, { color: theme.colors.textSecondary }]}>
-            Venue Desk:
-          </Text>
-          <Text style={[styles.resourceValue, { color: theme.colors.text }]}>
-            Hall 4B, Innovation Lab
+          <Text variant="caption" style={{ color: theme.colors.textMuted, marginTop: 4 }}>
+            Medi-Caps University • Department of CSE
           </Text>
         </View>
-      </View>
-
-      {/* Sign Out Button to test Auth Gate transition */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={handleSignOut}
-        style={[
-          styles.signOutButton,
-          {
-            backgroundColor: theme.colors.surfaceElevated,
-            borderColor: theme.colors.error,
-          },
-        ]}
-      >
-        <Text style={[styles.signOutText, { color: theme.colors.error }]}>SIGN OUT</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
   content: {
     padding: 20,
+    paddingBottom: 40,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.5,
+  screenTitle: {
+    marginBottom: 6,
   },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
+  resourceCard: {
+    marginTop: 8,
     marginBottom: 24,
+    padding: 16,
   },
-  card: {
-    padding: 18,
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 16,
-  },
-  cardHeader: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    marginBottom: 10,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  userRole: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  resourceRow: {
+  infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1A2133',
+    borderBottomColor: 'transparent',
   },
-  resourceLabel: {
-    fontSize: 13,
+  signOutContainer: {
+    marginBottom: 24,
   },
-  resourceValue: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  signOutButton: {
-    height: 48,
-    borderRadius: 10,
-    borderWidth: 1,
+  footer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-  },
-  signOutText: {
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    paddingVertical: 12,
   },
 });

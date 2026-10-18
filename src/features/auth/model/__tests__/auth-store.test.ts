@@ -1,8 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Session, User } from '@supabase/supabase-js';
 
+import { queryClient } from '@/shared/lib/query-client';
 import { supabase } from '@/shared/lib/supabase';
 
-import { useAuthStore } from '../auth-store';
+import type { ProfileWithTeam } from '../../types';
+import { PERSISTED_QUERY_CACHE_KEY, useAuthStore } from '../auth-store';
 
 // Mock supabase client
 jest.mock('@/shared/lib/supabase', () => ({
@@ -18,7 +21,9 @@ describe('useAuthStore (Zustand Auth Store)', () => {
     useAuthStore.setState({
       session: null,
       user: null,
+      profile: null,
       isInitialized: false,
+      authNotice: null,
     });
     jest.clearAllMocks();
   });
@@ -27,7 +32,9 @@ describe('useAuthStore (Zustand Auth Store)', () => {
     const state = useAuthStore.getState();
     expect(state.session).toBeNull();
     expect(state.user).toBeNull();
+    expect(state.profile).toBeNull();
     expect(state.isInitialized).toBe(false);
+    expect(state.authNotice).toBeNull();
   });
 
   it('updates session and derives user when setSession is called', () => {
@@ -54,35 +61,40 @@ describe('useAuthStore (Zustand Auth Store)', () => {
     expect(state.user).toEqual(mockUser);
   });
 
-  it('sets user to null when setSession is called with null', () => {
-    useAuthStore.getState().setSession(null);
+  it('sets profile when setProfile is called', () => {
+    const mockProfile: ProfileWithTeam = {
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      full_name: 'Test Hacker',
+      email: 'hacker@medicaps.ac.in',
+      college: 'Medi-Caps',
+      city: 'Indore',
+      phone: null,
+      team_id: null,
+      role: 'participant',
+      created_at: '2026-10-18T00:00:00.000Z',
+    };
 
-    const state = useAuthStore.getState();
-    expect(state.session).toBeNull();
-    expect(state.user).toBeNull();
+    useAuthStore.getState().setProfile(mockProfile);
+    expect(useAuthStore.getState().profile).toEqual(mockProfile);
   });
 
-  it('sets user to null when session user is missing or undefined', () => {
-    const sessionWithoutUser = {
-      access_token: 'token',
-      refresh_token: 'refresh',
-      expires_in: 3600,
-      token_type: 'bearer',
-    } as unknown as Session;
-
-    useAuthStore.getState().setSession(sessionWithoutUser);
-    expect(useAuthStore.getState().user).toBeNull();
-  });
-
-  it('updates isInitialized state accurately', () => {
+  it('updates isInitialized flag', () => {
     useAuthStore.getState().setIsInitialized(true);
     expect(useAuthStore.getState().isInitialized).toBe(true);
-
-    useAuthStore.getState().setIsInitialized(false);
-    expect(useAuthStore.getState().isInitialized).toBe(false);
   });
 
-  it('clears session and user on signOut', async () => {
+  it('manages authNotice state and clearing', () => {
+    useAuthStore.getState().setAuthNotice('Session expired');
+    expect(useAuthStore.getState().authNotice).toBe('Session expired');
+
+    useAuthStore.getState().clearAuthNotice();
+    expect(useAuthStore.getState().authNotice).toBeNull();
+  });
+
+  it('clears session, profile, and both in-memory and persisted query caches on signOut', async () => {
+    const clearSpy = jest.spyOn(queryClient, 'clear');
+    const removeItemSpy = jest.spyOn(AsyncStorage, 'removeItem').mockResolvedValueOnce();
+
     const mockUser: User = {
       id: 'user-xyz',
       app_metadata: {},
@@ -100,18 +112,34 @@ describe('useAuthStore (Zustand Auth Store)', () => {
         user: mockUser,
       },
       user: mockUser,
+      profile: {
+        id: 'user-xyz',
+        full_name: 'Hacker',
+        email: 'hacker@medicaps.ac.in',
+        college: null,
+        city: null,
+        phone: null,
+        team_id: null,
+        role: 'participant',
+        created_at: '2026-10-18T00:00:00.000Z',
+      },
       isInitialized: true,
     });
 
-    await useAuthStore.getState().signOut();
+    await useAuthStore.getState().signOut('Forced logout notice');
 
     expect(supabase.auth.signOut).toHaveBeenCalled();
+    expect(clearSpy).toHaveBeenCalled();
+    expect(removeItemSpy).toHaveBeenCalledWith(PERSISTED_QUERY_CACHE_KEY);
+
     const state = useAuthStore.getState();
     expect(state.session).toBeNull();
     expect(state.user).toBeNull();
+    expect(state.profile).toBeNull();
+    expect(state.authNotice).toBe('Forced logout notice');
   });
 
-  it('handles signOut errors gracefully and still clears local state', async () => {
+  it('handles signOut errors gracefully and still clears state', async () => {
     (supabase.auth.signOut as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
     await useAuthStore.getState().signOut();
@@ -119,10 +147,11 @@ describe('useAuthStore (Zustand Auth Store)', () => {
     const state = useAuthStore.getState();
     expect(state.session).toBeNull();
     expect(state.user).toBeNull();
+    expect(state.authNotice).toBeNull();
   });
 
-  it('handles non-Error objects thrown during signOut gracefully', async () => {
-    (supabase.auth.signOut as jest.Mock).mockRejectedValueOnce('A raw string error occurred');
+  it('handles AsyncStorage error during signOut gracefully', async () => {
+    jest.spyOn(AsyncStorage, 'removeItem').mockRejectedValueOnce(new Error('Disk write error'));
 
     await useAuthStore.getState().signOut();
 

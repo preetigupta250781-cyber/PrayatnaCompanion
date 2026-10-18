@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { useAuthStore } from '@/features/auth';
+import { authApi, PROFILE_MISSING_MESSAGE, useAuthStore } from '@/features/auth';
 import { useAppTheme } from '@/shared/hooks/use-theme';
 import { logger } from '@/shared/lib/logger';
 import { queryClient } from '@/shared/lib/query-client';
@@ -21,48 +21,82 @@ initSentry();
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function NavigationWithAuthGate(): React.JSX.Element | null {
-  const { session, isInitialized, setSession, setIsInitialized } = useAuthStore();
+  const { session, isInitialized, setSession, setProfile, setIsInitialized, signOut } =
+    useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const theme = useAppTheme();
 
-  // Initialize Supabase auth session listener
+  // Initialize Supabase auth session & verify profile on cold start (zero flicker)
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session: initialSession } }) => {
+    async function initAuth(): Promise<void> {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+
+        const initialSession = data.session;
+        if (!initialSession) {
+          if (isMounted) {
+            setSession(null);
+            setSentryUser(null);
+            setIsInitialized(true);
+          }
+          return;
+        }
+
+        // Verify profile exists on cold start to avoid flicker into (tabs)
+        const profile = await authApi.fetchProfileWithTeam(initialSession.user.id);
+        if (!profile) {
+          logger.warn('Cold start session has no profile row. Forcing sign out.');
+          await signOut(PROFILE_MISSING_MESSAGE);
+          if (isMounted) {
+            setIsInitialized(true);
+          }
+          return;
+        }
+
         if (isMounted) {
           setSession(initialSession);
-          setSentryUser(initialSession?.user?.id ?? null);
+          setProfile(profile);
+          setSentryUser(initialSession.user.id);
           setIsInitialized(true);
         }
-      })
-      .catch((error: unknown) => {
-        logger.warn('Error fetching initial Supabase session', {
+      } catch (error: unknown) {
+        logger.warn('Error during cold start auth initialization', {
           error: error instanceof Error ? error.message : String(error),
         });
         if (isMounted) {
           setIsInitialized(true);
         }
-      });
+      }
+    }
+
+    void initAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      if (isMounted) {
-        setSession(currentSession);
-        setSentryUser(currentSession?.user?.id ?? null);
+    } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      if (!isMounted) return;
+
+      if (event === 'SIGNED_OUT' || !currentSession) {
+        setSession(null);
+        setSentryUser(null);
         setIsInitialized(true);
+        return;
       }
+
+      setSession(currentSession);
+      setSentryUser(currentSession.user.id);
+      setIsInitialized(true);
     });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [setSession, setIsInitialized]);
+  }, [setSession, setProfile, setIsInitialized, signOut]);
 
   // Hide splash screen once initial session is resolved
   useEffect(() => {

@@ -1,51 +1,78 @@
-import type { Session, User } from '@supabase/supabase-js';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '@/features/auth';
+import { authApi, loginFormSchema, useAuthStore } from '@/features/auth';
 import { useAppTheme } from '@/shared/hooks/use-theme';
+import { AppError, mapToAppError } from '@/shared/lib/errors';
+import { Badge, Button, Card, Input, Text } from '@/shared/ui';
 
 export default function LoginScreen(): React.JSX.Element {
   const theme = useAppTheme();
-  const { setSession } = useAuthStore();
+  const { setSession, authNotice, clearAuthNotice } = useAuthStore();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
+  const [generalError, setGeneralError] = useState<string | undefined>();
 
-  const handleDemoSignIn = (): void => {
-    setIsLoading(true);
-    // Simulate setting session to test the auth gate transitioning to /(tabs)
-    const mockUser: User = {
-      id: 'demo-user-id',
-      app_metadata: {},
-      user_metadata: { name: 'Hacker' },
-      aud: 'authenticated',
-      created_at: new Date().toISOString(),
-    };
+  const validate = (): boolean => {
+    setEmailError(undefined);
+    setPasswordError(undefined);
+    setGeneralError(undefined);
 
-    const mockSession: Session = {
-      access_token: 'mock-access-token',
-      refresh_token: 'mock-refresh-token',
-      expires_in: 3600,
-      token_type: 'bearer',
-      user: mockUser,
-    };
-
-    setTimeout(() => {
-      setSession(mockSession);
-      setIsLoading(false);
-    }, 400);
+    const result = loginFormSchema.safeParse({ email, password });
+    if (!result.success) {
+      const formatted = result.error.format();
+      if (formatted.email?._errors[0]) {
+        setEmailError(formatted.email._errors[0]);
+      }
+      if (formatted.password?._errors[0]) {
+        setPasswordError(formatted.password._errors[0]);
+      }
+      return false;
+    }
+    return true;
   };
+
+  const handleSignIn = async (): Promise<void> => {
+    if (!validate()) return;
+
+    clearAuthNotice();
+    setIsSubmitting(true);
+
+    try {
+      const { session } = await authApi.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      setSession(session);
+    } catch (err: unknown) {
+      const appErr: AppError = mapToAppError(err);
+
+      if (appErr.code === 'AUTH_INVALID_CREDENTIALS') {
+        setGeneralError('Invalid email or password. Please verify your credentials.');
+      } else if (appErr.code === 'NETWORK_DISCONNECTED' || appErr.code === 'NETWORK_TIMEOUT') {
+        setGeneralError('Network connection failed. Please check your internet connection.');
+      } else {
+        setGeneralError(appErr.userMessage);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const activeNotice = generalError ?? authNotice;
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
@@ -53,125 +80,122 @@ export default function LoginScreen(): React.JSX.Element {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
           {/* Hackathon Badge */}
-          <View
-            style={[
-              styles.badge,
-              {
-                backgroundColor: theme.colors.badge,
-                borderColor: theme.colors.border,
-              },
-            ]}
-          >
-            <View style={[styles.badgeDot, { backgroundColor: theme.colors.accent }]} />
-            <Text style={[styles.badgeText, { color: theme.colors.accent }]}>
-              PRAYATNA 2026 // COMPANION
-            </Text>
+          <View style={styles.badgeRow}>
+            <Badge label="PRAYATNA 2026 // HACKATHON" variant="accent" size="sm" />
           </View>
 
-          {/* Title and Subtitle */}
+          {/* Header */}
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>Prayatna</Text>
-            <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-              Official hackathon companion portal. Sign in to access your team dashboard, schedule,
-              and problem statements.
+            <Text variant="h1" style={styles.title}>
+              Prayatna
+            </Text>
+            <Text variant="body" style={{ color: theme.colors.textSecondary, marginTop: 6 }}>
+              Official hacker companion portal. Sign in to access your squad, schedule, and problem
+              statements.
             </Text>
           </View>
 
-          {/* Form Card */}
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.colors.card,
-                borderColor: theme.colors.cardBorder,
-              },
-            ]}
-          >
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-                HACKER EMAIL
+          {/* Flash Notice / Error Banner */}
+          {activeNotice ? (
+            <Card
+              variant="outlined"
+              style={[
+                styles.noticeCard,
+                {
+                  backgroundColor: theme.colors.surfaceElevated,
+                  borderColor: generalError ? theme.colors.error : theme.colors.warning,
+                },
+              ]}
+              accessibilityLabel={activeNotice}
+            >
+              <Text
+                variant="bodySm"
+                style={{
+                  color: generalError ? theme.colors.error : theme.colors.warning,
+                  fontWeight: '600',
+                }}
+              >
+                {activeNotice}
               </Text>
-              <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="hacker@prayatna.org"
-                placeholderTextColor={theme.colors.textMuted}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.colors.surfaceElevated,
-                    borderColor: theme.colors.border,
-                    color: theme.colors.text,
-                  },
-                ]}
-              />
-            </View>
+            </Card>
+          ) : null}
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: theme.colors.textSecondary }]}>PASSWORD</Text>
-              <TextInput
+          {/* Credentials Card */}
+          <Card variant="default" style={styles.card}>
+            <Input
+              label="HACKER EMAIL"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (emailError) setEmailError(undefined);
+              }}
+              placeholder="participant@medicaps.ac.in"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
+              errorText={emailError}
+              disabled={isSubmitting}
+              accessibilityLabel="Email input"
+            />
+
+            <View style={styles.inputSpacing}>
+              <Input
+                label="PASSWORD"
                 value={password}
-                onChangeText={setPassword}
-                placeholder="••••••••••••"
-                placeholderTextColor={theme.colors.textMuted}
-                secureTextEntry
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.colors.surfaceElevated,
-                    borderColor: theme.colors.border,
-                    color: theme.colors.text,
-                  },
-                ]}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError(undefined);
+                }}
+                placeholder="Enter your password"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                errorText={passwordError}
+                disabled={isSubmitting}
+                accessibilityLabel="Password input"
+                rightElement={
+                  <TouchableOpacity
+                    onPress={() => setShowPassword((prev) => !prev)}
+                    style={styles.eyeButton}
+                    accessibilityRole="button"
+                    accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text
+                      variant="caption"
+                      style={{ color: theme.colors.accent, fontWeight: '700' }}
+                    >
+                      {showPassword ? 'HIDE' : 'SHOW'}
+                    </Text>
+                  </TouchableOpacity>
+                }
               />
             </View>
 
-            {/* Placeholder Sign In Button */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleDemoSignIn}
-              disabled={isLoading}
-              style={[
-                styles.primaryButton,
-                {
-                  backgroundColor: theme.colors.accent,
-                },
-              ]}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#08090E" />
-              ) : (
-                <Text style={styles.primaryButtonText}>SIGN IN</Text>
-              )}
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              <Button
+                title="SIGN IN"
+                variant="primary"
+                size="lg"
+                fullWidth
+                onPress={handleSignIn}
+                loading={isSubmitting}
+                disabled={isSubmitting}
+                accessibilityLabel="Sign in button"
+              />
+            </View>
 
-            {/* Demo / Guest Bypass for quick testing */}
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={handleDemoSignIn}
-              style={[
-                styles.secondaryButton,
-                {
-                  borderColor: theme.colors.border,
-                  backgroundColor: theme.colors.surfaceHighlight,
-                },
-              ]}
-            >
-              <Text style={[styles.secondaryButtonText, { color: theme.colors.textSecondary }]}>
-                ENTER AS GUEST / DEMO
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer Info */}
-          <Text style={[styles.footerText, { color: theme.colors.textMuted }]}>
-            Secured with Supabase Auth & SecureStore
-          </Text>
-        </View>
+            {/* Note: Forgot Password */}
+            <Text variant="caption" style={[styles.helpText, { color: theme.colors.textMuted }]}>
+              Forgot password? Contact the organizers.
+            </Text>
+          </Card>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -184,95 +208,46 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
-  container: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 32,
   },
-  badge: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
+  badgeRow: {
     marginBottom: 16,
-  },
-  badgeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 8,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.2,
+    alignItems: 'flex-start',
   },
   header: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: '800',
     letterSpacing: -0.5,
   },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 8,
+  noticeCard: {
+    marginBottom: 18,
+    padding: 12,
   },
   card: {
-    borderRadius: 16,
-    borderWidth: 1,
     padding: 20,
-    marginBottom: 24,
   },
-  inputGroup: {
-    marginBottom: 16,
+  inputSpacing: {
+    marginTop: 16,
   },
-  label: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-  },
-  input: {
-    height: 48,
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    fontSize: 15,
-  },
-  primaryButton: {
-    height: 48,
-    borderRadius: 8,
-    alignItems: 'center',
+  eyeButton: {
+    minHeight: 44,
+    minWidth: 44,
     justifyContent: 'center',
-    marginTop: 8,
-  },
-  primaryButtonText: {
-    color: '#08090E',
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  secondaryButton: {
-    height: 44,
-    borderRadius: 8,
-    borderWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
+    paddingHorizontal: 8,
   },
-  secondaryButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.6,
+  buttonContainer: {
+    marginTop: 20,
   },
-  footerText: {
+  helpText: {
     textAlign: 'center',
-    fontSize: 12,
+    marginTop: 16,
   },
 });

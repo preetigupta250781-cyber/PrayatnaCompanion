@@ -296,6 +296,32 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - `getNowAndNextEvents`: Identifies active event ($\text{startsAt} \le \text{now} < \text{endsAt}$) and next upcoming event, picking earliest finishing on concurrent sessions.
   - `getCountdownParts` & `formatCountdown`: Decomposes remaining time into days, hours, minutes, and seconds (`2d 04h 12m 30s` or `04:12:30`).
 
+### 4.11 Authentication, Session Management, Profile Watcher & More Tab
+
+- **Feature Structure (`src/features/auth`):**
+  - Modular feature architecture: `api/auth-api.ts`, `hooks/use-session.ts`, `hooks/use-profile.ts`, `model/auth-store.ts`, `components/ProfileCard.tsx`, and `types/index.ts`.
+- **Hacker Login Screen (`app/(auth)/login.tsx`):**
+  - Clean keyboard-avoiding layout with dark/light theme integration.
+  - Email and password input fields with inline Zod validation (`loginFormSchema`).
+  - Show/Hide password toggle for user convenience.
+  - Button loading state with spinner and disabled states during authentication.
+  - Distinct friendly error messages for `AUTH_INVALID_CREDENTIALS` versus `NETWORK_DISCONNECTED`.
+  - Notice text: _"Forgot password? Contact the organizers."_ (no self sign-up screen, preserving hackathon participant integrity).
+  - Flash alert support via `authNotice` banner when redirected from protected screens.
+- **Session & Profile Watcher Hooks (`useSession`, `useProfile`):**
+  - `useSession`: Reactive Zustand selector returning `isAuthenticated`, `isLoading`, `session`, `user`, and `authNotice`.
+  - `useProfile`: TanStack Query integration watching user profile joined with team details.
+  - Automatic forced logout (`PROFILE_MISSING_MESSAGE`) if a session exists in auth storage but no matching row exists in `profiles`.
+  - Automatic forced logout (`SESSION_EXPIRED_MESSAGE`) if a token refresh fails or the account has been removed.
+  - Guaranteed zero-flicker cold start via pre-verification in `app/_layout.tsx` before splash screen dismissal.
+- **Account & More Tab (`app/(tabs)/more.tsx`):**
+  - 5-state presentation: Loading (skeleton), Error (with retry), and Success (ProfileCard).
+  - `ProfileCard`: Displays participant initials avatar, online badge, full name, email, role chip (`PARTICIPANT` / `ORGANIZER`), college name with city, and team name with squad code.
+  - Hackathon resources card: Event Wi-Fi SSID, passcode, and physical help desk location.
+  - Sign Out button triggering platform-specific confirmation dialogs (`Alert.alert` on native, `window.confirm` on web).
+  - Cache clearance: On sign-out, both in-memory `queryClient.clear()` and persisted `AsyncStorage` query cache (`PRAYATNA_QUERY_CACHE_V1`) are wiped cleanly, and Sentry user context is unbound.
+  - Footer displaying semantic application version and native build numbers from `expo-constants`.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -305,7 +331,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 23 test suites passed, 193/193 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 29 test suites passed, 224/224 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
@@ -313,12 +339,12 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 
 | Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
 | -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
-| `src/features/`            | 100%         | 100%       | 100%        | 100%       | **Exceeds 80%** |
+| `src/features/`            | 97.46%       | 82.35%     | 96.66%      | 97.26%     | **Exceeds 80%** |
 | `src/shared/hooks/`        | 93.75%       | 75.00%     | 92.85%      | 93.10%     | **Exceeds 80%** |
-| `src/shared/lib/`          | 93.91%       | 83.93%     | 81.96%      | 94.01%     | **Exceeds 80%** |
-| `src/shared/ui/`           | 94.44%       | 83.81%     | 100%        | 95.52%     | **Exceeds 80%** |
+| `src/shared/lib/`          | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
+| `src/shared/ui/`           | 94.84%       | 86.33%     | 100%        | 95.93%     | **Exceeds 80%** |
 | `src/shared/utils/`        | 98.94%       | 89.23%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **94.84%**   | **84.48%** | **91.66%**  | **95.40%** | **PASSED**      |
+| **All Monitored Files**    | **95.19%**   | **86.19%** | **92.77%**  | **95.64%** | **PASSED**      |
 
 ---
 

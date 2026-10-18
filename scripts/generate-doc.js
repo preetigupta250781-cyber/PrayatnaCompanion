@@ -551,6 +551,32 @@ function buildDocument() {
             spacing: { after: 200 },
           }),
 
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.9 Authentication Feature, Protected Session Gate, Profile Watcher & More Tab',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Delivered the end-to-end hacker authentication and profile management system: ' +
+                  '(1) Hacker Login Screen (app/(auth)/login.tsx) with dark/light theming, email & password fields with inline Zod validation, password show/hide toggle, loading indicator on submission, distinct messages for invalid credentials vs network errors, and "Forgot password? Contact the organizers." notice without public self-registration. ' +
+                  '(2) Reactive useSession hook providing session state and flash notices (authNotice) for redirect warnings. ' +
+                  '(3) TanStack Query useProfile hook joining profiles with teams, auto-enforcing sign-out if a profile row is missing or if the token is revoked/account deleted. ' +
+                  '(4) Cold start zero-flicker splash screen pre-verification in app/_layout.tsx ensuring authenticated users transition smoothly to tabs while invalid sessions land on login. ' +
+                  '(5) Account & More Tab (app/(tabs)/more.tsx) with 5-state presentation, ProfileCard displaying participant initials avatar, online badge, team name, and squad code, hackathon Wi-Fi / help desk resources card, native confirmation sign-out dialogs, and cache purging (both in-memory TanStack query cache and persisted AsyncStorage cache) on logout.'
+              ),
+            ],
+            spacing: { after: 200 },
+          }),
+
           // Section 4: Quality Assurance & Test Verification
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
@@ -610,7 +636,7 @@ function buildDocument() {
                   createDataCell('npm run test:ci', 25, true),
                   createDataCell('PASSED', 15, true, true),
                   createDataCell(
-                    '23 test suites passed, 193/193 tests green. > 80% coverage.',
+                    '29 test suites passed, 224/224 tests green. > 80% coverage.',
                     35,
                     true
                   ),
@@ -658,10 +684,10 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('src/features/ (Domain Schemas, Auth)', 30, false, true),
-                  createDataCell('100%', 17),
-                  createDataCell('100%', 17),
-                  createDataCell('100%', 18),
-                  createDataCell('100%', 18),
+                  createDataCell('97.46%', 17),
+                  createDataCell('82.35%', 17),
+                  createDataCell('96.66%', 18),
+                  createDataCell('97.26%', 18),
                 ],
               }),
               new TableRow({
@@ -677,18 +703,18 @@ function buildDocument() {
                 children: [
                   createDataCell('src/shared/lib/ (Errors, Realtime, Time, etc.)', 30, false, true),
                   createDataCell('93.91%', 17),
-                  createDataCell('83.93%', 17),
+                  createDataCell('85.71%', 17),
                   createDataCell('81.96%', 18),
-                  createDataCell('94.01%', 18),
+                  createDataCell('94.03%', 18),
                 ],
               }),
               new TableRow({
                 children: [
                   createDataCell('src/shared/ui/ (Design System & Skeletons)', 30, true, true),
-                  createDataCell('94.44%', 17, true),
-                  createDataCell('83.81%', 17, true),
+                  createDataCell('94.84%', 17, true),
+                  createDataCell('86.33%', 17, true),
                   createDataCell('100%', 18, true),
-                  createDataCell('95.52%', 18, true),
+                  createDataCell('95.93%', 18, true),
                 ],
               }),
               new TableRow({
@@ -703,10 +729,10 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('All Monitored Codebase Files', 30, true, true),
-                  createDataCell('94.84%', 17, true, true),
-                  createDataCell('84.48%', 17, true, true),
-                  createDataCell('91.66%', 18, true, true),
-                  createDataCell('95.40%', 18, true, true),
+                  createDataCell('95.19%', 17, true, true),
+                  createDataCell('86.19%', 17, true, true),
+                  createDataCell('92.77%', 18, true, true),
+                  createDataCell('95.64%', 18, true, true),
                 ],
               }),
             ],

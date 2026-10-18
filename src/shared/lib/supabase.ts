@@ -13,7 +13,8 @@ const CHUNK_SIZE = 1800;
 const CHUNK_COUNT_SUFFIX = '__chunk_count';
 const getChunkKey = (key: string, index: number): string => `${key}__chunk_${index}`;
 
-const isSecureStoreAvailable = (): boolean => Platform.OS !== 'web';
+const isSecureStoreAvailable = (): boolean =>
+  typeof Platform !== 'undefined' && Boolean(Platform?.OS) && Platform.OS !== 'web';
 
 /**
  * Custom auth storage adapter for Supabase that stores tokens in expo-secure-store
@@ -141,7 +142,7 @@ export const supabase = createClient(
   {
     auth: {
       storage: SecureStoreChunkingAdapter,
-      autoRefreshToken: true,
+      autoRefreshToken: process.env.NODE_ENV !== 'test',
       persistSession: true,
       detectSessionInUrl: false,
     },

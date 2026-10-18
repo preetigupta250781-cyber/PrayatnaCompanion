@@ -15,8 +15,8 @@ jest.mock('@sentry/react-native', () => ({
 }));
 
 // Mock expo-constants
-jest.mock('expo-constants', () => ({
-  expoConfig: {
+jest.mock('expo-constants', () => {
+  const config = {
     version: '1.0.0',
     android: {
       versionCode: 1,
@@ -24,8 +24,15 @@ jest.mock('expo-constants', () => ({
     ios: {
       buildNumber: '1',
     },
-  },
-}));
+  };
+  return {
+    __esModule: true,
+    default: {
+      expoConfig: config,
+    },
+    expoConfig: config,
+  };
+});
 
 // Mock expo-secure-store
 jest.mock('expo-secure-store', () => {
@@ -80,4 +87,12 @@ jest.mock('@react-native-community/netinfo', () =>
 jest.mock('@react-native-async-storage/async-storage', () =>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
+// Mock react-native-safe-area-context
+jest.mock(
+  'react-native-safe-area-context',
+  () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('react-native-safe-area-context/jest/mock').default
 );

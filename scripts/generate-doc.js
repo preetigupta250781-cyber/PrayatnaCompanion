@@ -521,6 +521,33 @@ function buildDocument() {
                   'Standardized the 5-State Architecture through ScreenState coordinating TanStack Query results, ErrorState with refetch, EmptyState with custom actions, and NetInfo-driven OfflineBanner. Included an isolated developer-only preview screen app/dev/ui-kit.tsx.'
               ),
             ],
+            spacing: { after: 140 },
+          }),
+
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.8 Data Layer, Synchronization, Error Mapping & Realtime Architecture',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Engineered an enterprise data synchronization foundation featuring: ' +
+                  '(1) Generated Supabase TypeScript types with automated npm script "gen:types" and comprehensive Zod schemas across all feature domains (teams, profile, schedule, problems, announcements, leaderboard, transit) with strict type derivation. ' +
+                  '(2) Centralized error handling layer with typed AppError class and mapToAppError() translating PostgREST, Supabase Auth, network drops, timeouts, and Zod errors to friendly user messages, guaranteeing raw errors and secrets are never surfaced to the UI. ' +
+                  '(3) TanStack Query setup with resource-specific stale times (schedule 60s, announcements 15s, leaderboard 10s, problems 30s, bus 10min), exponential backoff retries exclusively on retryable errors, focusManager & onlineManager synchronization, and AsyncStorage persistence. ' +
+                  '(4) Server time synchronization calling RPC server_now() with latency adjustment, exposing useServerNow() for accurate live countdowns. ' +
+                  '(5) Resilient Realtime Manager subscribing to database tables with reference counting, automatic reconnection with backoff, 30s polling fallback, and cache invalidation. ' +
+                  '(6) Centralized IST date utilities for calendar day grouping across midnight, active/upcoming event resolution, and countdown formatting.'
+              ),
+            ],
             spacing: { after: 200 },
           }),
 
@@ -583,7 +610,7 @@ function buildDocument() {
                   createDataCell('npm run test:ci', 25, true),
                   createDataCell('PASSED', 15, true, true),
                   createDataCell(
-                    '19 test suites passed, 117/117 tests green. > 80% coverage.',
+                    '23 test suites passed, 193/193 tests green. > 80% coverage.',
                     35,
                     true
                   ),
@@ -630,7 +657,7 @@ function buildDocument() {
               }),
               new TableRow({
                 children: [
-                  createDataCell('src/features/ (Auth Store)', 30, false, true),
+                  createDataCell('src/features/ (Domain Schemas, Auth)', 30, false, true),
                   createDataCell('100%', 17),
                   createDataCell('100%', 17),
                   createDataCell('100%', 18),
@@ -639,20 +666,20 @@ function buildDocument() {
               }),
               new TableRow({
                 children: [
-                  createDataCell('src/shared/hooks/ (Theme)', 30, true, true),
-                  createDataCell('100%', 17, true),
-                  createDataCell('100%', 17, true),
-                  createDataCell('100%', 18, true),
-                  createDataCell('100%', 18, true),
+                  createDataCell('src/shared/hooks/ (Theme, Server Time)', 30, true, true),
+                  createDataCell('93.75%', 17, true),
+                  createDataCell('75.00%', 17, true),
+                  createDataCell('92.85%', 18, true),
+                  createDataCell('93.10%', 18, true),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('src/shared/lib/ (Logger, Sentry, Supabase)', 30, false, true),
-                  createDataCell('95.52%', 17),
-                  createDataCell('83.33%', 17),
-                  createDataCell('70.83%', 18),
-                  createDataCell('96.00%', 18),
+                  createDataCell('src/shared/lib/ (Errors, Realtime, Time, etc.)', 30, false, true),
+                  createDataCell('93.91%', 17),
+                  createDataCell('83.93%', 17),
+                  createDataCell('81.96%', 18),
+                  createDataCell('94.01%', 18),
                 ],
               }),
               new TableRow({
@@ -667,8 +694,8 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('src/shared/utils/ (Asia/Kolkata Date)', 30, false, true),
-                  createDataCell('100%', 17),
-                  createDataCell('95.83%', 17),
+                  createDataCell('98.94%', 17),
+                  createDataCell('89.23%', 17),
                   createDataCell('100%', 18),
                   createDataCell('100%', 18),
                 ],
@@ -676,10 +703,10 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('All Monitored Codebase Files', 30, true, true),
-                  createDataCell('95.32%', 17, true, true),
-                  createDataCell('84.69%', 17, true, true),
-                  createDataCell('91.95%', 18, true, true),
-                  createDataCell('96.11%', 18, true, true),
+                  createDataCell('94.84%', 17, true, true),
+                  createDataCell('84.48%', 17, true, true),
+                  createDataCell('91.66%', 18, true, true),
+                  createDataCell('95.40%', 18, true, true),
                 ],
               }),
             ],

@@ -259,6 +259,43 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - Interactive component catalog demonstrating all variants, inputs, avatars, bottom sheet, skeletons, and the 5-state testbed.
   - Protected by `__DEV__` guard (displays 404 in production builds).
 
+### 4.10 Data & Synchronization Layer
+
+- **Supabase TypeScript Types & Generation (`src/shared/types/database.ts`):**
+  - Configured npm script `"gen:types": "npx supabase gen types typescript --local > src/shared/types/database.ts"`.
+  - Comprehensive TypeScript interfaces for all public database tables (`teams`, `profiles`, `schedule_events`, `problem_statements`, `announcements`, `leaderboard_entries`, `bus_routes`, `bus_stops`, `bus_route_paths`), views (`leaderboard_view`), and RPC functions (`server_now`, `is_organizer`, `next_problem_release`).
+- **Feature Domain Zod Schemas (`src/features/*/types/index.ts`):**
+  - Built runtime schemas with strict type derivations via `z.infer` for every entity used by the app:
+    - `teams`: `teamSchema`, `teamInsertSchema`, `teamUpdateSchema`, `Team`.
+    - `profile`: `profileSchema`, `profileUpdateSchema`, `userRoleSchema`, `Profile`.
+    - `schedule`: `scheduleEventSchema`, `eventTypeSchema`, `ScheduleEvent`.
+    - `problems`: `problemStatementSchema`, `ProblemStatement`.
+    - `announcements`: `announcementSchema`, `announcementPrioritySchema`, `Announcement`.
+    - `leaderboard`: `leaderboardEntrySchema`, `leaderboardRowSchema`, `leaderboardRoundItemSchema`, `LeaderboardRow`.
+    - `transit`: `busRouteSchema`, `busStopSchema`, `busRoutePointSchema`, `busRoutePathSchema`, `BusRoute`, `BusStop`.
+- **Typed Error Handling Layer (`src/shared/lib/errors.ts`):**
+  - Created typed `AppError` class with `AppErrorCode` (`NETWORK_DISCONNECTED`, `NETWORK_TIMEOUT`, `AUTH_INVALID_CREDENTIALS`, `AUTH_SESSION_EXPIRED`, `AUTH_UNAUTHORIZED`, `RESOURCE_NOT_FOUND`, `PERMISSION_DENIED`, `DUPLICATE_ENTRY`, `VALIDATION_ERROR`, `SERVER_ERROR`, `UNKNOWN_ERROR`).
+  - Implemented `mapToAppError()` mapper converting PostgREST codes (`23505`, `42501`, `PGRST116`, `PGRST301`), Supabase Auth errors, network failures, timeouts, and Zod errors into clear, friendly `userMessage` strings. Raw technical stack traces or internal secrets are never surfaced to the UI.
+- **TanStack Query Setup & Cache Persistence (`src/shared/lib/query-client.ts`):**
+  - Standardized resource-specific `staleTime`: schedule (60s), announcements (15s), leaderboard (10s), problems (30s), bus routes (10min), teams/profile (5min).
+  - Retry strategy using exponential backoff ($1\text{s}, 2\text{s}, 4\text{s}$ capped at $30\text{s}$) exclusively for retryable errors up to 3 attempts.
+  - Automatic refetching on app focus (`focusManager` synchronized with `AppState`) and internet reconnect (`onlineManager` synchronized with `@react-native-community/netinfo`).
+  - Cache persistence via `@tanstack/query-async-storage-persister` (`AsyncStorage`, 7-day retention) ensuring the app opens instantaneously with cached data even when offline.
+- **Authoritative Server Time Synchronization (`src/shared/lib/server-time.ts` & `src/shared/hooks/use-server-now.ts`):**
+  - Computes device clock offset against server time via `supabase.rpc('server_now')` accounting for network round-trip half latency: $\text{offset} = (\text{serverTime} + \text{latency}/2) - \text{localTime}$.
+  - Exposes `getServerNow()`, `getServerTimeOffset()`, and `useServerNow(intervalMs)` ticking hook used for hackathon countdowns and "now" selection without being fooled by altered device clocks.
+- **Resilient Realtime Manager (`src/shared/lib/realtime.ts`):**
+  - Manages Supabase Realtime WebSocket subscriptions across database tables (`schedule_events`, `announcements`, `leaderboard_entries`, `problem_statements`, `bus_routes`, `bus_stops`).
+  - Channel reference counting preventing duplicate subscriptions across screens.
+  - Automatic exponential backoff reconnection on socket disruption.
+  - Automatic fallback to 30-second polling (`setInterval`) whenever the WebSocket disconnects (`CHANNEL_ERROR`, `TIMED_OUT`), smoothly reverting to push when reconnected (`SUBSCRIBED`).
+  - Invalidates relevant TanStack Query keys upon receiving database mutation payloads and cleanly unmounts channels when subscriber count reaches zero.
+- **Enhanced IST Date Utilities (`src/shared/utils/date.ts`):**
+  - All formatting strictly in `Asia/Kolkata` (IST).
+  - `groupEventsByDay`: Groups hackathon events into chronological calendar days (Day 1, Day 2, etc.), handling midnight crossovers and pre-event schedules.
+  - `getNowAndNextEvents`: Identifies active event ($\text{startsAt} \le \text{now} < \text{endsAt}$) and next upcoming event, picking earliest finishing on concurrent sessions.
+  - `getCountdownParts` & `formatCountdown`: Decomposes remaining time into days, hours, minutes, and seconds (`2d 04h 12m 30s` or `04:12:30`).
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -268,7 +305,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 19 test suites passed, 117/117 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 23 test suites passed, 193/193 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
@@ -277,11 +314,11 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
 | -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
 | `src/features/`            | 100%         | 100%       | 100%        | 100%       | **Exceeds 80%** |
-| `src/shared/hooks/`        | 100%         | 100%       | 100%        | 100%       | **Exceeds 80%** |
-| `src/shared/lib/`          | 95.52%       | 83.33%     | 70.83%      | 96.00%     | **Exceeds 80%** |
+| `src/shared/hooks/`        | 93.75%       | 75.00%     | 92.85%      | 93.10%     | **Exceeds 80%** |
+| `src/shared/lib/`          | 93.91%       | 83.93%     | 81.96%      | 94.01%     | **Exceeds 80%** |
 | `src/shared/ui/`           | 94.44%       | 83.81%     | 100%        | 95.52%     | **Exceeds 80%** |
-| `src/shared/utils/`        | 100%         | 95.83%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **95.32%**   | **84.69%** | **91.95%**  | **96.11%** | **PASSED**      |
+| `src/shared/utils/`        | 98.94%       | 89.23%     | 100%        | 100%       | **Exceeds 80%** |
+| **All Monitored Files**    | **94.84%**   | **84.48%** | **91.66%**  | **95.40%** | **PASSED**      |
 
 ---
 

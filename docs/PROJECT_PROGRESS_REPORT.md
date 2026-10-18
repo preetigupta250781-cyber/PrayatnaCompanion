@@ -4,10 +4,10 @@
 **Application Type:** Cross-Platform Mobile Application (iOS & Android)  
 **Framework:** Expo (SDK 57) / React Native (0.86) with Expo Router  
 **Primary Language:** TypeScript (Strict Mode, `noUncheckedIndexedAccess: true`, Zero `any`)  
-**Backend & Database:** Supabase  
+**Backend & Database:** Supabase (PostgreSQL with RLS, Realtime & Custom Storage Adapter)  
 **Monitoring & Error Reporting:** Sentry for React Native (`@sentry/react-native`)  
 **CI/CD Pipeline:** GitHub Actions & EAS Build  
-**Status:** Phase 1 & Phase 2 Complete (Engineering Foundations, Architecture, Security, Theming, Navigation, Testing & CI/CD)  
+**Status:** Phase 1, 2 & Database Schema Complete (Engineering Foundations, Architecture, Security, Theming, Navigation, Testing & Supabase Schema)  
 **Last Updated:** October 2026
 
 ---
@@ -166,6 +166,32 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   4. Runs unit tests with coverage (`npm run test:ci`).
   5. Verifies configuration health (`npx expo-doctor`).
 - **EAS Build Profiles (`eas.json`):** Defines `development` (internal client), `preview` (APK/TestFlight staging), and `production` (optimized cloud builds).
+
+### 4.7. Supabase Database Schema & Security Architecture (`supabase/migrations/0001_init.sql`)
+
+- **Tables Provisioned:**
+  - `teams`: Name and join code uniqueness.
+  - `profiles`: Linked to `auth.users(id)` on delete cascade with participant/organizer roles.
+  - `schedule_events`: Event categories with `ends_at > starts_at` constraint.
+  - `problem_statements`: Unique problem codes and time-locked release timestamps.
+  - `announcements`: Broadcast messages with priority validation (`normal`, `important`, `urgent`).
+  - `leaderboard_entries`: Per-round team scoring with `published` boolean and unique `(team_id, round_name)`.
+  - `bus_routes`, `bus_stops`, `bus_route_paths`: Campus transit logistics with coordinate checks (`latitude between -90 and 90`, `longitude between -180 and 180`) and sequenced polyline JSON paths.
+- **Security Definer Utility Functions:**
+  - `public.is_organizer()`: Verifies whether the active session belongs to an event organizer.
+  - `public.next_problem_release()`: Returns only the earliest upcoming `release_at` without leaking unreleased problem content.
+  - `public.server_now()`: Server-synchronized timestamp to prevent client clock discrepancies.
+- **Triggers:**
+  - `trg_profiles_enforce_update_restrictions`: Pre-update trigger blocking non-organizers from altering their own `role` or `team_id`.
+  - `on_auth_user_created`: Post-insert trigger on `auth.users` provisioning a participant profile row automatically.
+- **Row-Level Security (RLS) Policies:**
+  - `problem_statements`: Authenticated read strictly restricted to `release_at <= now()`; organizers have full access.
+  - `leaderboard_entries`: Authenticated read strictly restricted to `published = true`; organizers have full access.
+  - Read access for authenticated participants; write/update/delete restricted to organizers across all logistical tables.
+- **Security-Invoker View (`public.leaderboard_view`):**
+  - Configured with `security_invoker = true` to compute `dense_rank()` and aggregated total scores dynamically under the caller's RLS policies.
+- **Realtime Integration:**
+  - Added `schedule_events`, `problem_statements`, `announcements`, `leaderboard_entries`, `bus_routes`, and `bus_stops` to `supabase_realtime` publication with `replica identity full`.
 
 ---
 

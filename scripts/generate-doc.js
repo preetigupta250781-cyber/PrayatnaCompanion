@@ -453,6 +453,29 @@ function buildDocument() {
                 'Every screen in the application utilizes <ScreenState> to handle five distinct UX states: Loading (skeleton matching layout), Success (clean render with zero layout shift), Empty (contextual glyph and message), Error (friendly explanation + Retry button), and Offline (alert banner + cached data).'
               ),
             ],
+            spacing: { after: 140 },
+          }),
+
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.5 Supabase Database Schema & Security Architecture',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Created the initial database migration supabase/migrations/0001_init.sql featuring 9 core tables (teams, profiles, schedule_events, problem_statements, announcements, leaderboard_entries, bus_routes, bus_stops, bus_route_paths). ' +
+                  'Enforces UUID primary keys with gen_random_uuid(), timestamptz columns, and RLS on every table. ' +
+                  'Key security assets include security definer functions (is_organizer, next_problem_release, server_now), a before-update trigger preventing non-organizers from altering their role or team_id, locked problem releases (release_at <= now()), locked leaderboard entries (published = true), a security-invoker leaderboard_view with dense_rank() and round breakdowns, and realtime publication registration with full replica identity.'
+              ),
+            ],
             spacing: { after: 200 },
           }),
 

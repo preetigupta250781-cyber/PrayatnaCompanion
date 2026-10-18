@@ -1,6 +1,7 @@
-import React from 'react';
 import { Tabs } from 'expo-router';
+import React from 'react';
 import { Platform } from 'react-native';
+
 import { useAppTheme } from '@/shared/hooks/use-theme';
 import { TabIcon } from '@/shared/ui';
 

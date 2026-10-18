@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export interface OfflineBannerProps {

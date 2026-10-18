@@ -1,12 +1,13 @@
 import { useColorScheme } from 'react-native';
+
 import {
-  colors,
-  spacing,
-  radius,
-  typography,
   ACCENT_COLOR,
   AppTheme,
+  colors,
+  radius,
+  spacing,
   ThemeColors,
+  typography,
 } from '@/config/theme';
 
 export function useAppTheme(): AppTheme {

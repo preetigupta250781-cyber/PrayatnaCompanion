@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text } from 'react-native';
 import renderer from 'react-test-renderer';
+
 import { ScreenState } from '../screen-state';
 import { Skeleton } from '../skeleton';
 

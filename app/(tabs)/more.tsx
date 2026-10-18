@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useAppTheme } from '@/shared/hooks/use-theme';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import { useAuthStore } from '@/features/auth';
+import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export default function MoreScreen(): React.JSX.Element {
   const theme = useAppTheme();
@@ -58,7 +59,9 @@ export default function MoreScreen(): React.JSX.Element {
           <Text style={[styles.resourceLabel, { color: theme.colors.textSecondary }]}>
             Hacker Wi-Fi:
           </Text>
-          <Text style={[styles.resourceValue, { color: theme.colors.text }]}>Prayatna_Hacks_5G</Text>
+          <Text style={[styles.resourceValue, { color: theme.colors.text }]}>
+            Prayatna_Hacks_5G
+          </Text>
         </View>
 
         <View style={styles.resourceRow}>

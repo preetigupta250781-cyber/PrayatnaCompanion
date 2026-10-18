@@ -1,12 +1,15 @@
 /**
  * Structured, security-conscious logger for Prayatna Companion.
- * Automatically sanitizes sensitive keys (tokens, passwords, secrets, PII)
- * and enforces consistent log output across dev and production.
+ * - Redacts sensitive keys (tokens, authorization, passwords, credentials, emails, PII)
+ * - Outputs to console in development
+ * - Sends Sentry breadcrumbs and events in production
  */
+
+import * as Sentry from '@sentry/react-native';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogContext {
+export interface LogContext {
   readonly [key: string]: unknown;
 }
 
@@ -22,12 +25,11 @@ const SENSITIVE_KEY_PATTERNS = [
   /phone/i,
 ];
 
-function sanitizeValue(key: string, value: unknown): unknown {
+export function sanitizeValue(key: string, value: unknown): unknown {
   if (value === null || value === undefined) {
     return value;
   }
 
-  // Check if key matches sensitive patterns
   for (const pattern of SENSITIVE_KEY_PATTERNS) {
     if (pattern.test(key)) {
       return '[REDACTED]';
@@ -49,11 +51,24 @@ function sanitizeValue(key: string, value: unknown): unknown {
   return value;
 }
 
-function sanitizeContext(context?: LogContext): Record<string, unknown> | undefined {
+export function sanitizeContext(context?: LogContext): Record<string, unknown> | undefined {
   if (!context) {
     return undefined;
   }
   return sanitizeValue('context', context) as Record<string, unknown>;
+}
+
+function toSentrySeverity(level: LogLevel): Sentry.SeverityLevel {
+  switch (level) {
+    case 'debug':
+      return 'debug';
+    case 'info':
+      return 'info';
+    case 'warn':
+      return 'warning';
+    case 'error':
+      return 'error';
+  }
 }
 
 function outputLog(level: LogLevel, message: string, context?: LogContext): void {
@@ -65,7 +80,6 @@ function outputLog(level: LogLevel, message: string, context?: LogContext): void
     switch (level) {
       case 'debug':
       case 'info':
-        // Safe formatted output in dev
         if (sanitized && Object.keys(sanitized).length > 0) {
           console.info(formattedMessage, sanitized);
         } else {
@@ -88,11 +102,23 @@ function outputLog(level: LogLevel, message: string, context?: LogContext): void
         break;
     }
   } else {
-    // Production behavior: only warnings and errors are emitted
-    if (level === 'warn') {
-      console.warn(formattedMessage, sanitized);
-    } else if (level === 'error') {
-      console.error(formattedMessage, sanitized);
+    // Production behavior: record Sentry breadcrumbs
+    try {
+      Sentry.addBreadcrumb({
+        category: 'app.logger',
+        message,
+        level: toSentrySeverity(level),
+        data: sanitized,
+      });
+
+      if (level === 'error') {
+        Sentry.captureMessage(message, {
+          level: 'error',
+          extra: sanitized,
+        });
+      }
+    } catch {
+      // Fallback silently if Sentry is not initialized
     }
   }
 }

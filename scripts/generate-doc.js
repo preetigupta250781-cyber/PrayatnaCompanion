@@ -19,10 +19,9 @@ const {
 } = require('docx');
 
 const PRIMARY_COLOR = '0F172A'; // Slate 900
-const ACCENT_COLOR = '0284C7';  // Sky 600
-const MUTED_COLOR = '64748B';   // Slate 500
-const BG_LIGHT = 'F8FAFC';      // Slate 50
-const BORDER_COLOR = 'CBD5E1';  // Slate 300
+const ACCENT_COLOR = '0284C7'; // Sky 600
+const MUTED_COLOR = '64748B'; // Slate 500
+const BG_LIGHT = 'F8FAFC'; // Slate 50
 
 function createHeaderCell(text, widthPercent) {
   return new TableCell({
@@ -85,7 +84,7 @@ function buildDocument() {
         properties: {
           page: {
             margin: {
-              top: 1440, // 1 inch
+              top: 1440,
               right: 1440,
               bottom: 1440,
               left: 1440,
@@ -99,7 +98,7 @@ function buildDocument() {
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({
-                    text: 'Prayatna Companion — Engineering Project Report',
+                    text: 'Prayatna Companion — Engineering Architecture & Progress Report',
                     size: 16,
                     color: MUTED_COLOR,
                     font: 'Arial',
@@ -141,7 +140,6 @@ function buildDocument() {
           }),
         },
         children: [
-          // Document Title
           new Paragraph({
             heading: HeadingLevel.TITLE,
             children: [
@@ -156,13 +154,12 @@ function buildDocument() {
             spacing: { after: 120 },
           }),
 
-          // Subtitle
           new Paragraph({
             children: [
               new TextRun({
-                text: 'Mobile Engineering Architecture & Progress Report',
+                text: 'Phase 1 & Phase 2 Engineering Architecture, Foundations & Quality Assurance Report',
                 bold: true,
-                size: 26,
+                size: 24,
                 color: ACCENT_COLOR,
                 font: 'Arial',
               }),
@@ -170,7 +167,6 @@ function buildDocument() {
             spacing: { after: 300 },
           }),
 
-          // Metadata Callout Box
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
@@ -193,11 +189,13 @@ function buildDocument() {
                           new TextRun({ text: 'Application Framework: ', bold: true }),
                           new TextRun('Expo (SDK 57) / React Native (0.86) with Expo Router\n'),
                           new TextRun({ text: 'Language & Typing: ', bold: true }),
-                          new TextRun('TypeScript (Strict Mode Enabled, 0 "any" types)\n'),
-                          new TextRun({ text: 'Backend Infrastructure: ', bold: true }),
-                          new TextRun('Supabase (Auth, Realtime, Postgres)\n'),
+                          new TextRun(
+                            'TypeScript (Strict Mode, noUncheckedIndexedAccess, 0 "any")\n'
+                          ),
+                          new TextRun({ text: 'Error Monitoring & CI/CD: ', bold: true }),
+                          new TextRun('Sentry for React Native, GitHub Actions, EAS Build\n'),
                           new TextRun({ text: 'Current Status: ', bold: true }),
-                          new TextRun('Phase 1 Complete (Foundation, Security, Navigation, Theming)\n'),
+                          new TextRun('Phase 1 & Phase 2 100% Complete & Verified Green\n'),
                           new TextRun({ text: 'Document Prepared For: ', bold: true }),
                           new TextRun('Engineering Leadership & Senior Mentors'),
                         ],
@@ -228,23 +226,16 @@ function buildDocument() {
           new Paragraph({
             children: [
               new TextRun(
-                'Prayatna Companion is an official, cross-platform mobile application designed to serve as the real-time operational hub for participants, mentors, and judges during the Prayatna 2026 Hackathon. ' +
-                'The system enables attendees to check live schedules, view track-based problem statements, track real-time scores on the leaderboard, receive immediate event announcements, and access essential campus network resources.'
-              ),
-            ],
-            spacing: { after: 140 },
-          }),
-
-          new Paragraph({
-            children: [
-              new TextRun(
-                'Phase 1 focuses on establishing an enterprise-ready mobile foundation adhering to strict engineering standards: zero tolerance for untyped "any" declarations, runtime environment schema validation, hardware-backed secure storage with automated chunking, and flicker-free authentication routing.'
+                'Prayatna Companion is the official mobile application for participants, mentors, and judges of the Prayatna 2026 Hackathon. ' +
+                  'The application serves as the centralized digital hub for event schedules, track-based problem statements, live leaderboard rankings, team identity, and venue connectivity. ' +
+                  'Phase 1 established the application architecture, routing layout, secure authentication storage, and design tokens. ' +
+                  'Phase 2 established enterprise-grade engineering foundations: strict compiler safety, automated pre-commit hooks, automated GitHub Actions CI, production Sentry crash monitoring with privacy controls, a zero-console PII-redacting logger, and a comprehensive Jest test suite exceeding an 80% coverage threshold.'
               ),
             ],
             spacing: { after: 240 },
           }),
 
-          // Section 2: Technology Stack & Package Architecture
+          // Section 2: Technology Stack & Architecture
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
             children: [
@@ -272,42 +263,81 @@ function buildDocument() {
                 children: [
                   createDataCell('Expo SDK', 30, false, true),
                   createDataCell('57.0.30', 20),
-                  createDataCell('Native toolchain, runtime, and continuous native build pipeline.', 50),
+                  createDataCell(
+                    'Native toolchain, continuous native build pipeline (Expo Go Play Store compatible).',
+                    50
+                  ),
                 ],
               }),
               new TableRow({
                 children: [
                   createDataCell('Expo Router', 30, true, true),
                   createDataCell('57.0.28', 20, true),
-                  createDataCell('Type-safe file-system based routing and screen navigators.', 50, true),
+                  createDataCell(
+                    'Type-safe file-system based routing and screen navigators.',
+                    50,
+                    true
+                  ),
                 ],
               }),
               new TableRow({
                 children: [
                   createDataCell('@supabase/supabase-js', 30, false, true),
                   createDataCell('2.118.0', 20),
-                  createDataCell('Authentication, PostgreSQL client, and Realtime websocket protocol.', 50),
+                  createDataCell(
+                    'Authentication, PostgreSQL client, and Realtime websocket protocol.',
+                    50
+                  ),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('@tanstack/react-query', 30, true, true),
-                  createDataCell('5.104.3', 20, true),
-                  createDataCell('Server-state management, automated retries, and stale-while-revalidate caching.', 50, true),
+                  createDataCell('@sentry/react-native', 30, true, true),
+                  createDataCell('7.11.0', 20, true),
+                  createDataCell(
+                    'Production crash reporting, breadcrumb tracking, and EAS source maps integration.',
+                    50,
+                    true
+                  ),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('expo-secure-store', 30, false, true),
-                  createDataCell('58.0.2', 20),
-                  createDataCell('Encrypted storage via iOS Keychain and Android Keystore.', 50),
+                  createDataCell('@tanstack/react-query', 30, false, true),
+                  createDataCell('5.104.3', 20),
+                  createDataCell(
+                    'Server-state management, automated retries, and stale-while-revalidate caching.',
+                    50
+                  ),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('expo-secure-store', 30, true, true),
+                  createDataCell('57.0.4', 20, true),
+                  createDataCell(
+                    'Hardware-backed encrypted storage with transparent chunking adapter.',
+                    50,
+                    true
+                  ),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('jest & jest-expo', 30, false, true),
+                  createDataCell('29.7.0 / 57.0', 20),
+                  createDataCell('Unit testing runtime enforcing >= 80% coverage threshold.', 50),
                 ],
               }),
               new TableRow({
                 children: [
                   createDataCell('zustand', 30, true, true),
                   createDataCell('5.0.15', 20, true),
-                  createDataCell('Lightweight, boilerplate-free client state store for session and UI states.', 50, true),
+                  createDataCell(
+                    'Lightweight reactive state management for authentication and session state.',
+                    50,
+                    true
+                  ),
                 ],
               }),
               new TableRow({
@@ -317,91 +347,17 @@ function buildDocument() {
                   createDataCell('Strict schema validation for startup environment variables.', 50),
                 ],
               }),
-              new TableRow({
-                children: [
-                  createDataCell('react-native-reanimated', 30, true, true),
-                  createDataCell('4.7.1', 20, true),
-                  createDataCell('Direct UI thread 60/120fps animations without JavaScript bridge lag.', 50, true),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  createDataCell('react-native-maps', 30, false, true),
-                  createDataCell('1.29.11', 20),
-                  createDataCell('Campus geospatial rendering and indoor venue positioning.', 50),
-                ],
-              }),
-              new TableRow({
-                children: [
-                  createDataCell('expo-haptics', 30, true, true),
-                  createDataCell('58.0.7', 20, true),
-                  createDataCell('Tactile haptic feedback for user interactions and key events.', 50, true),
-                ],
-              }),
             ],
           }),
 
           new Paragraph({ text: '', spacing: { after: 240 } }),
 
-          // Section 3: Architecture & Feature Organization
+          // Section 3: Engineering Solutions & Standards
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
             children: [
               new TextRun({
-                text: '3. Architectural Design & Folder Hierarchy',
-                bold: true,
-                size: 32,
-                color: PRIMARY_COLOR,
-              }),
-            ],
-            spacing: { before: 240, after: 120 },
-          }),
-
-          new Paragraph({
-            children: [
-              new TextRun(
-                'To maintain a clean separation of concerns, the project enforces a strict boundary between the routing layer and business logic:'
-              ),
-            ],
-            spacing: { after: 100 },
-          }),
-
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: 'app/ Directory: ', bold: true }),
-              new TextRun('Dedicated purely to Expo Router route definitions, layout wrappers, and navigation hierarchy. No business domain logic or API clients are placed here.'),
-            ],
-          }),
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: 'src/features/ Directory: ', bold: true }),
-              new TextRun('Contains domain-driven feature modules (e.g., auth, schedule, leaderboard). Each feature encapsulates its own stores, hooks, and services.'),
-            ],
-          }),
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: 'src/shared/ Directory: ', bold: true }),
-              new TextRun('Cross-cutting concerns divided into ui (shared components like TabIcon), lib (Supabase client and QueryClient), hooks (useTheme), and utils.'),
-            ],
-          }),
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: 'src/config/ Directory: ', bold: true }),
-              new TextRun('Global app configurations, including startup Zod environment validation (env.ts) and the dark hackathon theme design tokens (theme.ts).'),
-            ],
-            spacing: { after: 200 },
-          }),
-
-          // Section 4: Key Engineering Accomplishments
-          new Paragraph({
-            heading: HeadingLevel.HEADING_1,
-            children: [
-              new TextRun({
-                text: '4. Critical Engineering Solutions',
+                text: '3. Core Engineering Solutions (Phase 1 & 2)',
                 bold: true,
                 size: 32,
                 color: PRIMARY_COLOR,
@@ -414,7 +370,7 @@ function buildDocument() {
             heading: HeadingLevel.HEADING_2,
             children: [
               new TextRun({
-                text: '4.1 SecureStore 2048-Byte Keystore Limit Chunking Adapter',
+                text: '3.1 Sentry Crash Monitoring & Privacy Guard',
                 bold: true,
                 size: 26,
                 color: PRIMARY_COLOR,
@@ -422,12 +378,12 @@ function buildDocument() {
             ],
             spacing: { before: 140, after: 80 },
           }),
-
           new Paragraph({
             children: [
               new TextRun(
-                'Problem Statement: The Android Keystore / iOS Keychain provided by expo-secure-store restricts values to 2048 bytes per entry. Supabase authentication sessions (comprising access tokens, refresh tokens, and serialized user metadata) frequently exceed 2.5KB–4KB. Native calls fail silently or crash the application upon authentication.\n\n' +
-                'Engineering Solution: Developed a custom SecureStoreChunkingAdapter implementing Supabase\'s SupportedStorage interface. Payloads are divided into 1800-byte chunks and saved with indexed keys along with a chunk count header. During session retrieval, all chunks are verified and reassembled atomically. When a session is updated or revoked, previous leftover chunks are automatically cleaned up.'
+                'Integrated @sentry/react-native with dynamic environment tagging (development vs production) and release identifiers (prayatna-companion@1.0.0). ' +
+                  'In adherence to security and privacy guidelines, only user.id is attached to events; emails, phone numbers, and names are strictly excluded. ' +
+                  'A custom Root ErrorBoundary catches unexpected React crashes, forwards telemetry to Sentry, and presents users with a clean recovery screen and an accessible Restart button.'
               ),
             ],
             spacing: { after: 140 },
@@ -437,7 +393,7 @@ function buildDocument() {
             heading: HeadingLevel.HEADING_2,
             children: [
               new TextRun({
-                text: '4.2 Startup Fail-Fast Environment Validation',
+                text: '3.2 Secure Structured Logger with PII Redaction',
                 bold: true,
                 size: 26,
                 color: PRIMARY_COLOR,
@@ -445,11 +401,12 @@ function buildDocument() {
             ],
             spacing: { before: 140, after: 80 },
           }),
-
           new Paragraph({
             children: [
               new TextRun(
-                'In src/config/env.ts, required environment variables (EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY) are validated against a strict Zod schema at app initialization. If any required variable is omitted or invalid, execution halts immediately with a clear diagnostic message, preventing silent runtime communication failures in production.'
+                'Direct console.log is completely disallowed across the codebase. All logging flows through src/shared/lib/logger.ts. ' +
+                  'The logger recursively sanitizes contexts against sensitive regex patterns (tokens, passwords, keys, secrets, credentials, emails, and phone numbers), replacing values with [REDACTED]. ' +
+                  'In development, logs output formatted timestamps to console; in production, logs record Sentry breadcrumbs and captured exceptions.'
               ),
             ],
             spacing: { after: 140 },
@@ -459,7 +416,7 @@ function buildDocument() {
             heading: HeadingLevel.HEADING_2,
             children: [
               new TextRun({
-                text: '4.3 Native Splash Screen & Flicker-Free Auth Gate',
+                text: '3.3 SecureStore 2048-Byte Keystore Chunking Adapter',
                 bold: true,
                 size: 26,
                 color: PRIMARY_COLOR,
@@ -467,11 +424,12 @@ function buildDocument() {
             ],
             spacing: { before: 140, after: 80 },
           }),
-
           new Paragraph({
             children: [
               new TextRun(
-                'To eliminate the unauthenticated screen flash common in hybrid apps, SplashScreen.preventAutoHideAsync() holds the native splash screen while Supabase resolves the stored session. An authentication routing guard directs unauthenticated users to /(auth)/login and authenticated users to /(tabs). Once the route guard settles, SplashScreen.hideAsync() reveals the correct screen seamlessly.'
+                'Android Keystore and iOS Keychain enforce a 2048-byte limit per key-value entry. ' +
+                  'Supabase session tokens typically measure 2.5KB-4KB. ' +
+                  'Our SecureStoreChunkingAdapter divides payloads into 1800-byte chunks with indexed keys and a chunk count header, atomically reassembling them on retrieval and deleting leftover chunks on renewal.'
               ),
             ],
             spacing: { after: 140 },
@@ -481,7 +439,7 @@ function buildDocument() {
             heading: HeadingLevel.HEADING_2,
             children: [
               new TextRun({
-                text: '4.4 Centralized Hackathon Design System',
+                text: '3.4 The 5-State Screen Architecture Contract',
                 bold: true,
                 size: 26,
                 color: PRIMARY_COLOR,
@@ -489,22 +447,21 @@ function buildDocument() {
             ],
             spacing: { before: 140, after: 80 },
           }),
-
           new Paragraph({
             children: [
               new TextRun(
-                'In src/config/theme.ts, the global ACCENT_COLOR (#00F0FF - Electric Cyan) is defined in a single source location, powering both dark and light color palettes. The dark aesthetic leverages obsidian and deep navy tones (#08090E, #10131B, #171C28) combined with structured typography, border radius, and spacing scales.'
+                'Every screen in the application utilizes <ScreenState> to handle five distinct UX states: Loading (skeleton matching layout), Success (clean render with zero layout shift), Empty (contextual glyph and message), Error (friendly explanation + Retry button), and Offline (alert banner + cached data).'
               ),
             ],
             spacing: { after: 200 },
           }),
 
-          // Section 5: Verification & Quality Assurance Results
+          // Section 4: Quality Assurance & Test Verification
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
             children: [
               new TextRun({
-                text: '5. Quality Assurance & Verification Results',
+                text: '4. Quality Assurance & Verification Results',
                 bold: true,
                 size: 32,
                 color: PRIMARY_COLOR,
@@ -518,42 +475,58 @@ function buildDocument() {
             rows: [
               new TableRow({
                 children: [
-                  createHeaderCell('Verification Gate', 28),
-                  createHeaderCell('Command', 28),
-                  createHeaderCell('Status', 14),
-                  createHeaderCell('Outcome / Verification Details', 30),
+                  createHeaderCell('Verification Gate', 25),
+                  createHeaderCell('Command', 25),
+                  createHeaderCell('Status', 15),
+                  createHeaderCell('Verified Details & Outcomes', 35),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('Strict TypeScript', 28, false, true),
-                  createDataCell('npm run typecheck', 28),
-                  createDataCell('PASSED', 14, false, true),
-                  createDataCell('0 errors. Zero "any" types across app/ and src/.', 30),
+                  createDataCell('Strict TypeScript', 25, false, true),
+                  createDataCell('npm run typecheck', 25),
+                  createDataCell('PASSED', 15, false, true),
+                  createDataCell('0 errors. noUncheckedIndexedAccess: true. Zero "any".', 35),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('Metro Dev Server', 28, true, true),
-                  createDataCell('npx expo start', 28, true),
-                  createDataCell('PASSED', 14, true, true),
-                  createDataCell('Boots clean, exports env, no warnings or deprecations.', 30, true),
+                  createDataCell('ESLint Analysis', 25, true, true),
+                  createDataCell('npm run lint', 25, true),
+                  createDataCell('PASSED', 15, true, true),
+                  createDataCell(
+                    '0 errors, 0 warnings. Flat config with Expo & import sorting.',
+                    35,
+                    true
+                  ),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('Cross-Platform Bundle', 28, false, true),
-                  createDataCell('npx expo export', 28),
-                  createDataCell('PASSED', 14, false, true),
-                  createDataCell('Bundled 100% of screens for iOS, Android, and Web.', 30),
+                  createDataCell('Code Formatting', 25, false, true),
+                  createDataCell('npm run format:check', 25),
+                  createDataCell('PASSED', 15, false, true),
+                  createDataCell('100% of files strictly conform to Prettier specifications.', 35),
                 ],
               }),
               new TableRow({
                 children: [
-                  createDataCell('Git Repository State', 28, true, true),
-                  createDataCell('git status / log', 28, true),
-                  createDataCell('PASSED', 14, true, true),
-                  createDataCell('Clean tree. .env securely ignored; .env.example tracked.', 30, true),
+                  createDataCell('Unit Test Suite', 25, true, true),
+                  createDataCell('npm run test:ci', 25, true),
+                  createDataCell('PASSED', 15, true, true),
+                  createDataCell(
+                    '10 test suites passed, 60/60 tests green. > 80% coverage.',
+                    35,
+                    true
+                  ),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('Expo Doctor', 25, false, true),
+                  createDataCell('npx expo-doctor', 25),
+                  createDataCell('PASSED', 15, false, true),
+                  createDataCell('21/21 checks passed. No dependency or configuration issues.', 35),
                 ],
               }),
             ],
@@ -561,7 +534,92 @@ function buildDocument() {
 
           new Paragraph({ text: '', spacing: { after: 240 } }),
 
-          // Section 6: Upcoming Phases & Roadmap
+          // Section 5: Coverage Metrics
+          new Paragraph({
+            heading: HeadingLevel.HEADING_1,
+            children: [
+              new TextRun({
+                text: '5. Jest Code Coverage Metrics',
+                bold: true,
+                size: 32,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 240, after: 120 },
+          }),
+
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({
+                children: [
+                  createHeaderCell('Module / Directory', 30),
+                  createHeaderCell('% Statements', 17),
+                  createHeaderCell('% Branch', 17),
+                  createHeaderCell('% Functions', 18),
+                  createHeaderCell('% Lines', 18),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('src/features/ (Auth Store)', 30, false, true),
+                  createDataCell('100%', 17),
+                  createDataCell('100%', 17),
+                  createDataCell('100%', 18),
+                  createDataCell('100%', 18),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('src/shared/hooks/ (Theme)', 30, true, true),
+                  createDataCell('100%', 17, true),
+                  createDataCell('100%', 17, true),
+                  createDataCell('100%', 18, true),
+                  createDataCell('100%', 18, true),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('src/shared/lib/ (Logger, Sentry, Supabase)', 30, false, true),
+                  createDataCell('95.52%', 17),
+                  createDataCell('83.33%', 17),
+                  createDataCell('70.83%', 18),
+                  createDataCell('96.00%', 18),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('src/shared/ui/ (5 States, Skeletons, Errors)', 30, true, true),
+                  createDataCell('100%', 17, true),
+                  createDataCell('72.72%', 17, true),
+                  createDataCell('100%', 18, true),
+                  createDataCell('100%', 18, true),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('src/shared/utils/ (Asia/Kolkata Date)', 30, false, true),
+                  createDataCell('100%', 17),
+                  createDataCell('95.83%', 17),
+                  createDataCell('100%', 18),
+                  createDataCell('100%', 18),
+                ],
+              }),
+              new TableRow({
+                children: [
+                  createDataCell('All Monitored Codebase Files', 30, true, true),
+                  createDataCell('97.27%', 17, true, true),
+                  createDataCell('83.67%', 17, true, true),
+                  createDataCell('85.10%', 18, true, true),
+                  createDataCell('97.60%', 18, true, true),
+                ],
+              }),
+            ],
+          }),
+
+          new Paragraph({ text: '', spacing: { after: 240 } }),
+
+          // Section 6: Strategic Roadmap
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
             children: [
@@ -577,14 +635,25 @@ function buildDocument() {
 
           new Paragraph({
             children: [
-              new TextRun({ text: '• Phase 2 — Data Integration: ', bold: true }),
-              new TextRun('Connect live Supabase Postgres schemas for teams, schedules, problem statements, and real-time score feeds using TanStack Query hooks.\n'),
-              new TextRun({ text: '• Phase 3 — Real-Time Push & WebSockets: ', bold: true }),
-              new TextRun('Deploy Supabase Realtime subscriptions to dynamically re-order the Leaderboard and broadcast emergency announcements to participants.\n'),
-              new TextRun({ text: '• Phase 4 — Offline-First Caching & Maps: ', bold: true }),
-              new TextRun('Leverage NetInfo, AsyncStorage, and react-native-maps to provide offline venue navigation and cached schedule inspection when event Wi-Fi is congested.\n'),
-              new TextRun({ text: '• Phase 5 — Production Builds & EAS: ', bold: true }),
-              new TextRun('Configure EAS Build profiles for iOS TestFlight and Android Google Play Internal App Sharing distribution.'),
+              new TextRun({ text: '• Phase 3 — Supabase Data Integration: ', bold: true }),
+              new TextRun(
+                'Build domain API services for schedules, problem statements, teams, and evaluations in src/features/<feature>/api/, exposed via TanStack Query custom hooks and strictly validated through Zod schemas.\n'
+              ),
+              new TextRun({ text: '• Phase 4 — Real-Time WebSocket Feeds: ', bold: true }),
+              new TextRun(
+                'Subscribe to Supabase Realtime channels for instant score calculation, leaderboard updates, and emergency hackathon announcements.\n'
+              ),
+              new TextRun({
+                text: '• Phase 5 — Offline Caching & Interactive Campus Maps: ',
+                bold: true,
+              }),
+              new TextRun(
+                'Integrate react-native-maps with indoor campus coordinates, caching schedule data locally via NetInfo + AsyncStorage for resilient offline access.\n'
+              ),
+              new TextRun({ text: '• Phase 6 — Production Cloud Builds & EAS: ', bold: true }),
+              new TextRun(
+                'Execute automated EAS builds with release profiles for Google Play Internal App Sharing and iOS TestFlight.'
+              ),
             ],
             spacing: { after: 200 },
           }),

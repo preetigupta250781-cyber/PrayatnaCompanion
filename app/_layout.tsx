@@ -1,14 +1,21 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import * as Sentry from '@sentry/react-native';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '@/shared/lib/query-client';
-import { supabase } from '@/shared/lib/supabase';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+
 import { useAuthStore } from '@/features/auth';
 import { useAppTheme } from '@/shared/hooks/use-theme';
 import { logger } from '@/shared/lib/logger';
+import { queryClient } from '@/shared/lib/query-client';
+import { initSentry, setSentryUser } from '@/shared/lib/sentry';
+import { supabase } from '@/shared/lib/supabase';
+import { ErrorBoundary } from '@/shared/ui';
+
+// Initialize Sentry with environment & release tags
+initSentry();
 
 // Keep splash screen visible until auth session is resolved
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -28,6 +35,7 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
       .then(({ data: { session: initialSession } }) => {
         if (isMounted) {
           setSession(initialSession);
+          setSentryUser(initialSession?.user?.id ?? null);
           setIsInitialized(true);
         }
       })
@@ -45,6 +53,7 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
     } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       if (isMounted) {
         setSession(currentSession);
+        setSentryUser(currentSession?.user?.id ?? null);
         setIsInitialized(true);
       }
     });
@@ -99,13 +108,17 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
   );
 }
 
-export default function RootLayout(): React.JSX.Element {
+function RootLayout(): React.JSX.Element {
   return (
-    <QueryClientProvider client={queryClient}>
-      <NavigationWithAuthGate />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <NavigationWithAuthGate />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
+
+export default Sentry.wrap(RootLayout);
 
 const styles = StyleSheet.create({
   container: {

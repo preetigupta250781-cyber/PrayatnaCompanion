@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+
 import { EmptyState, EmptyStateProps } from './empty-state';
 import { ErrorState, ErrorStateProps } from './error-state';
 import { OfflineBanner } from './offline-banner';

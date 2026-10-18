@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ColorValue } from 'react-native';
+import { ColorValue, StyleSheet, Text, View } from 'react-native';
 
 export type TabName = 'home' | 'schedule' | 'problems' | 'leaderboard' | 'more';
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export default function HomeScreen(): React.JSX.Element {
@@ -43,9 +44,7 @@ export default function HomeScreen(): React.JSX.Element {
             },
           ]}
         >
-          <Text style={[styles.metricLabel, { color: theme.colors.textSecondary }]}>
-            COUNTDOWN
-          </Text>
+          <Text style={[styles.metricLabel, { color: theme.colors.textSecondary }]}>COUNTDOWN</Text>
           <Text style={[styles.metricValue, { color: theme.colors.accent }]}>23:45:10</Text>
           <Text style={[styles.metricSub, { color: theme.colors.textMuted }]}>to submission</Text>
         </View>

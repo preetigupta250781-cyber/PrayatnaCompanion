@@ -1,18 +1,19 @@
+import type { Session, User } from '@supabase/supabase-js';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
+  View,
 } from 'react-native';
-import type { Session, User } from '@supabase/supabase-js';
-import { useAppTheme } from '@/shared/hooks/use-theme';
+
 import { useAuthStore } from '@/features/auth';
+import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export default function LoginScreen(): React.JSX.Element {
   const theme = useAppTheme();

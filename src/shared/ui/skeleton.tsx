@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, StyleSheet, ViewStyle } from 'react-native';
+
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export interface SkeletonProps {

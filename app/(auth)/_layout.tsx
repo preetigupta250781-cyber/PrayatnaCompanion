@@ -1,5 +1,6 @@
-import React from 'react';
 import { Stack } from 'expo-router';
+import React from 'react';
+
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 export default function AuthLayout(): React.JSX.Element {

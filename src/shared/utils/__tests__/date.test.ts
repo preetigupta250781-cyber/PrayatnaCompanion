@@ -1,10 +1,10 @@
 import {
-  formatInIST,
-  formatTimeIST,
-  formatDateIST,
-  formatDateTimeIST,
   APP_TIMEZONE,
   DATE_FORMATS,
+  formatDateIST,
+  formatDateTimeIST,
+  formatInIST,
+  formatTimeIST,
 } from '../date';
 
 describe('Date Utilities (Asia/Kolkata)', () => {
@@ -51,10 +51,21 @@ describe('Date Utilities (Asia/Kolkata)', () => {
   });
 
   describe('Invalid and Edge Case Inputs', () => {
-    it('returns "Invalid Date" gracefully for malformed strings', () => {
+    it('returns "Invalid Date" gracefully for malformed strings and invalid dates', () => {
       expect(formatInIST('not-a-date')).toBe('Invalid Date');
       expect(formatTimeIST('invalid')).toBe('Invalid Date');
       expect(formatDateIST('')).toBe('Invalid Date');
+      expect(formatDateTimeIST('invalid')).toBe('Invalid Date');
+      expect(formatInIST(new Date('invalid-date-string'))).toBe('Invalid Date');
+      expect(formatInIST(NaN)).toBe('Invalid Date');
+      expect(formatInIST(null as unknown as string)).toBe('Invalid Date');
+      expect(formatInIST(new Date(), "''''invalid")).toBe('Invalid Date');
+    });
+
+    it('formats time with or without IST suffix', () => {
+      const utcIso = '2026-10-18T06:00:00.000Z';
+      expect(formatTimeIST(utcIso, true)).toBe('11:30 AM IST');
+      expect(formatTimeIST(utcIso, false)).toBe('11:30 AM');
     });
 
     it('handles numeric epoch timestamps correctly', () => {

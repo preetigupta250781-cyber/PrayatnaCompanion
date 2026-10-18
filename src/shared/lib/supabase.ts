@@ -1,7 +1,9 @@
 import 'react-native-url-polyfill/auto';
+
 import { createClient, SupportedStorage } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+
 import { env } from '@/config/env';
 import { logger } from '@/shared/lib/logger';
 
@@ -11,7 +13,7 @@ const CHUNK_SIZE = 1800;
 const CHUNK_COUNT_SUFFIX = '__chunk_count';
 const getChunkKey = (key: string, index: number): string => `${key}__chunk_${index}`;
 
-const isSecureStoreAvailable = Platform.OS !== 'web';
+const isSecureStoreAvailable = (): boolean => Platform.OS !== 'web';
 
 /**
  * Custom auth storage adapter for Supabase that stores tokens in expo-secure-store
@@ -19,7 +21,7 @@ const isSecureStoreAvailable = Platform.OS !== 'web';
  */
 const SecureStoreChunkingAdapter: SupportedStorage = {
   getItem: async (key: string): Promise<string | null> => {
-    if (!isSecureStoreAvailable) {
+    if (!isSecureStoreAvailable()) {
       if (typeof localStorage !== 'undefined') {
         return localStorage.getItem(key);
       }
@@ -53,7 +55,7 @@ const SecureStoreChunkingAdapter: SupportedStorage = {
   },
 
   setItem: async (key: string, value: string): Promise<void> => {
-    if (!isSecureStoreAvailable) {
+    if (!isSecureStoreAvailable()) {
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem(key, value);
       }
@@ -107,7 +109,7 @@ const SecureStoreChunkingAdapter: SupportedStorage = {
   },
 
   removeItem: async (key: string): Promise<void> => {
-    if (!isSecureStoreAvailable) {
+    if (!isSecureStoreAvailable()) {
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(key);
       }

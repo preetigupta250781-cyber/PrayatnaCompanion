@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 interface TeamScore {
@@ -71,9 +72,7 @@ export default function LeaderboardScreen(): React.JSX.Element {
               </View>
 
               <View style={styles.teamDetails}>
-                <Text style={[styles.teamName, { color: theme.colors.text }]}>
-                  {team.teamName}
-                </Text>
+                <Text style={[styles.teamName, { color: theme.colors.text }]}>{team.teamName}</Text>
                 <Text style={[styles.teamTrack, { color: theme.colors.textMuted }]}>
                   {team.track} • {team.commits} commits
                 </Text>

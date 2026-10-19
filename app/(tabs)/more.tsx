@@ -111,6 +111,35 @@ export default function MoreScreen(): React.JSX.Element {
           </TouchableOpacity>
         </Card>
 
+        {/* Transit & Logistics Card */}
+        <Card variant="default" style={styles.resourceCard}>
+          <Text variant="label" style={{ color: theme.colors.textSecondary, marginBottom: 12 }}>
+            TRANSIT & LOGISTICS
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => router.push('/bus')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Bus Routes"
+            accessibilityHint="Navigates to bus routes, schedules, and transit maps"
+            style={styles.navRow}
+            activeOpacity={0.7}
+          >
+            <View style={styles.flex1}>
+              <Text variant="body" style={styles.navTitle}>
+                🚌 Bus Routes
+              </Text>
+              <Text variant="caption" style={{ color: theme.colors.textSecondary, marginTop: 2 }}>
+                View pickup points, schedules, and route maps
+              </Text>
+            </View>
+            <Text variant="body" style={{ color: theme.colors.accent, fontWeight: '700' }}>
+              →
+            </Text>
+          </TouchableOpacity>
+        </Card>
+
         {/* Event Resources Card */}
         <Card variant="default" style={styles.resourceCard}>
           <Text variant="label" style={{ color: theme.colors.textSecondary, marginBottom: 12 }}>

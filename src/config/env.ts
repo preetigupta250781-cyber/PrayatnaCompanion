@@ -7,6 +7,7 @@ const envSchema = z.object({
     .url('EXPO_PUBLIC_SUPABASE_URL must be a valid URL'),
   EXPO_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'EXPO_PUBLIC_SUPABASE_ANON_KEY is required'),
   EXPO_PUBLIC_SENTRY_DSN: z.string().url('EXPO_PUBLIC_SENTRY_DSN must be a valid URL').optional(),
+  EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -16,6 +17,7 @@ const validateEnv = (): Env => {
     EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
     EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     EXPO_PUBLIC_SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN || undefined,
+    EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || undefined,
   });
 
   if (!parsed.success) {

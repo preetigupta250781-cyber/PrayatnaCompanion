@@ -52,8 +52,6 @@ jest.mock('expo-secure-store', () => {
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View, Text } = require('react-native');
 
   return {
@@ -116,3 +114,51 @@ jest.mock('expo-router', () => ({
     Screen: () => null,
   }),
 }));
+
+// Mock react-native-maps
+jest.mock('react-native-maps', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require('react-native');
+
+  const MockMapView = React.forwardRef((props: any, ref: any) => {
+    React.useImperativeHandle(ref, () => ({
+      fitToCoordinates: jest.fn(),
+      animateToRegion: jest.fn(),
+      fitToElements: jest.fn(),
+      fitToSuppliedMarkers: jest.fn(),
+    }));
+    return React.createElement(
+      View,
+      { testID: props.testID || 'map-view', ...props },
+      props.children
+    );
+  });
+  MockMapView.displayName = 'MapView';
+
+  const MockMarker = React.forwardRef((props: any, ref: any) => {
+    return React.createElement(
+      View,
+      { testID: props.testID || 'map-marker', ...props },
+      props.children
+    );
+  });
+  MockMarker.displayName = 'Marker';
+
+  const MockCallout = (props: any) =>
+    React.createElement(View, { testID: 'map-callout', ...props }, props.children);
+  const MockPolyline = (props: any) =>
+    React.createElement(View, { testID: 'map-polyline', ...props }, props.children);
+
+  return {
+    __esModule: true,
+    default: MockMapView,
+    MapView: MockMapView,
+    Marker: MockMarker,
+    Callout: MockCallout,
+    Polyline: MockPolyline,
+    PROVIDER_GOOGLE: 'google',
+    PROVIDER_DEFAULT: 'default',
+  };
+});

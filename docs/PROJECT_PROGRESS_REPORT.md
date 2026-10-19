@@ -7,7 +7,7 @@
 **Backend & Database:** Supabase (PostgreSQL with RLS, Realtime & Custom Storage Adapter)  
 **Monitoring & Error Reporting:** Sentry for React Native (`@sentry/react-native`)  
 **CI/CD Pipeline:** GitHub Actions & EAS Build  
-**Status:** Phase 1, 2, Database Schema, Auth, Core Event Features (Schedule & Announcements), and Problem Statements Track Feature Complete  
+**Status:** Phase 1, 2, Database Schema, Auth, Core Event Features (Schedule & Announcements), Problem Statements, Leaderboard, and Bus Transit Feature Complete  
 **Last Updated:** October 2026
 
 ---
@@ -413,6 +413,40 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - Subscribes to `leaderboard_entries` table changes via `useTableRealtime()`.
   - Automatically invalidates query cache on scores published, updated, or recalculated.
 
+### 4.5 Campus Transit & Bus Logistics Implementation (`src/features/bus`)
+
+- **Transit Route Discovery & Listing (`app/bus/index.tsx`):**
+  - Integrated direct entry point from the More tab under the **TRANSIT & LOGISTICS** section.
+  - Implements the strict 5-state presentation pattern utilizing `ScreenState`:
+    - **Loading State:** Renders `BusRouteListSkeleton` with route switcher pills and stop sequence layout.
+    - **Empty State:** Friendly empty state with guidance: _"Transit schedules will appear here once published by organizers."_
+    - **Error State:** Friendly error banner with one-tap retry invoking TanStack Query refetch.
+    - **Offline State:** Displays sticky offline banner followed by cached route cards.
+    - **Success State:** Interactive route list showing route name, origin city chip, departure time in IST (`Asia/Kolkata`), route color indicator dot, and description.
+  - Pull-to-refresh integration via `RefreshControl`.
+  - Mandatory logistics notice banner: _"Routes are updated manually by organizers. Live tracking is not available."_
+
+- **Interactive Route Detail & Mapping (`app/bus/[routeId].tsx`):**
+  - **`react-native-maps` Integration:**
+    - Map fitted to route bounds via `fitToCoordinates` with generous edge padding (`top: 60, right: 40, bottom: 80, left: 40`).
+    - Polyline path rendering from `bus_route_paths.points` in the route's custom theme color (`#00F0FF` for Indore Express, `#10B981` for Bhopal Shuttle).
+    - Custom numbered circular `Marker`s displaying sequence position (`1, 2, 3...`) matching route accent color.
+    - Tapping a marker presents a `Callout` with stop name, scheduled arrival time in IST, notes, and a direct action to open external directions.
+    - Quick preview card for selected stop with direct "Open in Maps ↗" action.
+  - **Stops Drawer & Timeline Selection:**
+    - Full bottom sheet drawer (`BottomSheet`) displaying complete chronological stop sequence (`BusStopTimelineItem`).
+    - Tapping any stop in the list or drawer smoothly animates and centers the map view on the stop's coordinates (`animateToRegion`) and highlights the stop.
+  - **Universal External Maps Navigation:**
+    - "Open in Google Maps" action using `Linking.openURL` with universal search query format (`https://www.google.com/maps/search/?api=1&query=lat,lng`).
+  - **Zero Permission & Edge Case Resiliency:**
+    - **Zero Location Permissions:** Strict requirement adhered to — no location permissions requested anywhere in the feature.
+    - **Zero Stops Graceful Handling:** Routes without stops render safely without crashing and display informative notices without attempting invalid coordinate bounding.
+    - **Invalid Coordinate Validation & Filtering:** Rejects coordinates with latitude outside `[-90, 90]`, longitude outside `[-180, 180]`, `NaN`, or non-numeric types; logs detailed warnings via `logger.warn` while preserving valid stops.
+    - **Map Load Failure Fallback:** If map rendering fails or on platforms where native maps are unavailable, the screen automatically falls back to displaying the complete scheduled stop sequence with full Google Maps linking support.
+
+- **Dynamic Native Configuration:**
+  - Configured `android.config.googleMaps.apiKey` in `app.config.ts` populated dynamically from `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY`.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -422,20 +456,21 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 56 test suites passed, 361/361 tests passed. $\ge 80\%$ coverage threshold met.     |
-| **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 61 test suites passed, 403/403 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Expo Configuration Check** | `npx expo config`      | **PASS (Exit 0)** | Validated configuration with Google Maps API key and plugins.                       |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
 ### Test Coverage Metrics
 
 | Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
 | -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
-| `src/features/`            | 96.22%       | 84.82%     | 96.47%      | 96.52%     | **Exceeds 80%** |
+| `src/features/bus/`        | 98.45%       | 88.24%     | 95.83%      | 98.57%     | **Exceeds 80%** |
+| `src/features/`            | 96.84%       | 85.90%     | 96.25%      | 97.02%     | **Exceeds 80%** |
 | `src/shared/hooks/`        | 96.87%       | 87.50%     | 92.85%      | 96.55%     | **Exceeds 80%** |
 | `src/shared/lib/`          | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
 | `src/shared/ui/`           | 94.86%       | 86.36%     | 100%        | 95.95%     | **Exceeds 80%** |
 | `src/shared/utils/`        | 99.12%       | 90.00%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **95.41%**   | **87.23%** | **94.65%**  | **95.73%** | **PASSED**      |
+| **All Monitored Files**    | **96.12%**   | **88.05%** | **95.10%**  | **96.42%** | **PASSED**      |
 
 ---
 
@@ -451,7 +486,11 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - User's team highlight and smooth scroll-to-my-team button.
   - Real-time score publication synchronization via Supabase Realtime with reduce-motion rank delta animations.
   - 5-state handling: `LeaderboardSkeleton` loading and `EmptyState` ("Results will appear once organizers publish them").
-- **Phase 5 (Campus Logistics & Transit):**
-  - Campus bus route schedules, stops, and route visualization.
+- **Phase 5 (Campus Logistics & Transit):** **[COMPLETE]**
+  - Campus transit route listings with departure times, origin cities, and color indicators.
+  - Interactive map visualization (`react-native-maps`) with route polylines and numbered stop sequence pins.
+  - Bottom sheet stop drawer, stop centering, and Google Maps external navigation.
+  - Resilient zero-stops, invalid-coordinate filtering, and map load failure fallbacks.
+  - Strict zero location permissions policy enforced.
 - **Phase 6 (EAS Cloud Build & Store Submission):**
   - Trigger EAS cloud builds for Android (`.apk` / `.aab`) and iOS (`.ipa`).

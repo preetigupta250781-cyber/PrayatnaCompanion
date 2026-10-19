@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, Platform } from 'react-native';
 import renderer from 'react-test-renderer';
@@ -139,5 +140,27 @@ describe('MoreScreen (app/(tabs)/more.tsx)', () => {
 
     expect(signOutSpy).toHaveBeenCalled();
     Platform.OS = originalOS;
+  });
+
+  it('navigates to bus routes screen when Bus Routes row is tapped', () => {
+    const mockRouter = { push: jest.fn() };
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <QueryClientProvider client={queryClient}>
+          <MoreScreen />
+        </QueryClientProvider>
+      );
+    });
+
+    const busBtn = tree?.root.findByProps({ accessibilityLabel: 'Bus Routes' });
+    expect(busBtn).toBeDefined();
+
+    renderer.act(() => {
+      busBtn?.props.onPress();
+    });
+
+    expect(mockRouter.push).toHaveBeenCalledWith('/bus');
   });
 });

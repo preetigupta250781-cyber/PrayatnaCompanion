@@ -1,170 +1,33 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export type EventType =
-  'session' | 'workshop' | 'jamming' | 'judging' | 'meal' | 'ceremony' | 'other';
-
-export type AnnouncementPriority = 'normal' | 'important' | 'urgent';
-
-export type UserRole = 'participant' | 'organizer';
-
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      teams: {
-        Row: {
-          id: string;
-          name: string;
-          team_code: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          team_code: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          team_code?: string;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      profiles: {
-        Row: {
-          id: string;
-          full_name: string | null;
-          email: string | null;
-          college: string | null;
-          city: string | null;
-          phone: string | null;
-          team_id: string | null;
-          role: UserRole;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          full_name?: string | null;
-          email?: string | null;
-          college?: string | null;
-          city?: string | null;
-          phone?: string | null;
-          team_id?: string | null;
-          role?: UserRole;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          full_name?: string | null;
-          email?: string | null;
-          college?: string | null;
-          city?: string | null;
-          phone?: string | null;
-          team_id?: string | null;
-          role?: UserRole;
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'profiles_team_id_fkey';
-            columns: ['team_id'];
-            isOneToOne: false;
-            referencedRelation: 'teams';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      schedule_events: {
-        Row: {
-          id: string;
-          title: string;
-          description: string | null;
-          location: string | null;
-          event_type: EventType;
-          starts_at: string;
-          ends_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          description?: string | null;
-          location?: string | null;
-          event_type: EventType;
-          starts_at: string;
-          ends_at: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          description?: string | null;
-          location?: string | null;
-          event_type?: EventType;
-          starts_at?: string;
-          ends_at?: string;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      problem_statements: {
-        Row: {
-          id: string;
-          code: string;
-          title: string;
-          description: string | null;
-          domain: string | null;
-          difficulty: string | null;
-          release_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          code: string;
-          title: string;
-          description?: string | null;
-          domain?: string | null;
-          difficulty?: string | null;
-          release_at: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          code?: string;
-          title?: string;
-          description?: string | null;
-          domain?: string | null;
-          difficulty?: string | null;
-          release_at?: string;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
       announcements: {
         Row: {
-          id: string;
-          title: string;
           body: string;
-          priority: AnnouncementPriority;
-          created_by: string | null;
           created_at: string;
-        };
-        Insert: {
-          id?: string;
+          created_by: string | null;
+          id: string;
+          priority: string;
           title: string;
+        };
+        ComputedFields: never;
+        Insert: {
           body: string;
-          priority?: AnnouncementPriority;
-          created_by?: string | null;
           created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          priority?: string;
+          title: string;
         };
         Update: {
-          id?: string;
-          title?: string;
           body?: string;
-          priority?: AnnouncementPriority;
-          created_by?: string | null;
           created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          priority?: string;
+          title?: string;
         };
         Relationships: [
           {
@@ -176,136 +39,25 @@ export interface Database {
           },
         ];
       };
-      leaderboard_entries: {
-        Row: {
-          id: string;
-          team_id: string;
-          round_name: string;
-          score: number;
-          published: boolean;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          team_id: string;
-          round_name: string;
-          score?: number;
-          published?: boolean;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          team_id?: string;
-          round_name?: string;
-          score?: number;
-          published?: boolean;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'leaderboard_entries_team_id_fkey';
-            columns: ['team_id'];
-            isOneToOne: false;
-            referencedRelation: 'teams';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      bus_routes: {
-        Row: {
-          id: string;
-          name: string;
-          description: string | null;
-          color: string | null;
-          origin_city: string | null;
-          departs_at: string | null;
-          sort_order: number;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          description?: string | null;
-          color?: string | null;
-          origin_city?: string | null;
-          departs_at?: string | null;
-          sort_order?: number;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          description?: string | null;
-          color?: string | null;
-          origin_city?: string | null;
-          departs_at?: string | null;
-          sort_order?: number;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      bus_stops: {
-        Row: {
-          id: string;
-          route_id: string;
-          name: string;
-          latitude: number;
-          longitude: number;
-          stop_order: number;
-          scheduled_time: string | null;
-          notes: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          route_id: string;
-          name: string;
-          latitude: number;
-          longitude: number;
-          stop_order: number;
-          scheduled_time?: string | null;
-          notes?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          route_id?: string;
-          name?: string;
-          latitude?: number;
-          longitude?: number;
-          stop_order?: number;
-          scheduled_time?: string | null;
-          notes?: string | null;
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'bus_stops_route_id_fkey';
-            columns: ['route_id'];
-            isOneToOne: false;
-            referencedRelation: 'bus_routes';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       bus_route_paths: {
         Row: {
-          id: string;
-          route_id: string;
-          points: Json;
           created_at: string;
-        };
-        Insert: {
-          id?: string;
+          id: string;
+          points: NonNullable<Json>;
           route_id: string;
-          points?: Json;
+        };
+        ComputedFields: never;
+        Insert: {
           created_at?: string;
+          id?: string;
+          points?: NonNullable<Json>;
+          route_id: string;
         };
         Update: {
-          id?: string;
-          route_id?: string;
-          points?: Json;
           created_at?: string;
+          id?: string;
+          points?: NonNullable<Json>;
+          route_id?: string;
         };
         Relationships: [
           {
@@ -317,35 +69,291 @@ export interface Database {
           },
         ];
       };
-    };
-    Views: {
-      leaderboard_view: {
+      bus_routes: {
         Row: {
+          color: string | null;
+          created_at: string;
+          departs_at: string | null;
+          description: string | null;
+          id: string;
+          name: string;
+          origin_city: string | null;
+          sort_order: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          color?: string | null;
+          created_at?: string;
+          departs_at?: string | null;
+          description?: string | null;
+          id?: string;
+          name: string;
+          origin_city?: string | null;
+          sort_order?: number;
+        };
+        Update: {
+          color?: string | null;
+          created_at?: string;
+          departs_at?: string | null;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          origin_city?: string | null;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      bus_stops: {
+        Row: {
+          created_at: string;
+          id: string;
+          latitude: number;
+          longitude: number;
+          name: string;
+          notes: string | null;
+          route_id: string;
+          scheduled_time: string | null;
+          stop_order: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          latitude: number;
+          longitude: number;
+          name: string;
+          notes?: string | null;
+          route_id: string;
+          scheduled_time?: string | null;
+          stop_order: number;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          latitude?: number;
+          longitude?: number;
+          name?: string;
+          notes?: string | null;
+          route_id?: string;
+          scheduled_time?: string | null;
+          stop_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'bus_stops_route_id_fkey';
+            columns: ['route_id'];
+            isOneToOne: false;
+            referencedRelation: 'bus_routes';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      leaderboard_entries: {
+        Row: {
+          id: string;
+          published: boolean;
+          round_name: string;
+          score: number;
           team_id: string;
-          team_name: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          published?: boolean;
+          round_name: string;
+          score?: number;
+          team_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          published?: boolean;
+          round_name?: string;
+          score?: number;
+          team_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'leaderboard_entries_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'leaderboard_view';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'leaderboard_entries_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      problem_statements: {
+        Row: {
+          code: string;
+          created_at: string;
+          description: string | null;
+          difficulty: string | null;
+          domain: string | null;
+          id: string;
+          release_at: string;
+          title: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          code: string;
+          created_at?: string;
+          description?: string | null;
+          difficulty?: string | null;
+          domain?: string | null;
+          id?: string;
+          release_at: string;
+          title: string;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          description?: string | null;
+          difficulty?: string | null;
+          domain?: string | null;
+          id?: string;
+          release_at?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          city: string | null;
+          college: string | null;
+          created_at: string;
+          email: string | null;
+          full_name: string | null;
+          id: string;
+          phone: string | null;
+          role: string;
+          team_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          city?: string | null;
+          college?: string | null;
+          created_at?: string;
+          email?: string | null;
+          full_name?: string | null;
+          id: string;
+          phone?: string | null;
+          role?: string;
+          team_id?: string | null;
+        };
+        Update: {
+          city?: string | null;
+          college?: string | null;
+          created_at?: string;
+          email?: string | null;
+          full_name?: string | null;
+          id?: string;
+          phone?: string | null;
+          role?: string;
+          team_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'leaderboard_view';
+            referencedColumns: ['team_id'];
+          },
+          {
+            foreignKeyName: 'profiles_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      schedule_events: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          ends_at: string;
+          event_type: string;
+          id: string;
+          location: string | null;
+          starts_at: string;
+          title: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          ends_at: string;
+          event_type: string;
+          id?: string;
+          location?: string | null;
+          starts_at: string;
+          title: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          ends_at?: string;
+          event_type?: string;
+          id?: string;
+          location?: string | null;
+          starts_at?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
+      teams: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
           team_code: string;
-          total_score: number;
-          published_rounds_count: number;
-          last_score_updated_at: string | null;
-          rounds: Json;
-          rank: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          team_code: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          team_code?: string;
         };
         Relationships: [];
       };
     };
+    Views: {
+      leaderboard_view: {
+        Row: {
+          last_score_updated_at: string | null;
+          published_rounds_count: number | null;
+          rank: number | null;
+          rounds: Json | null;
+          team_code: string | null;
+          team_id: string | null;
+          team_name: string | null;
+          total_score: number | null;
+        };
+        ComputedFields: never;
+        Relationships: [];
+      };
+    };
     Functions: {
-      is_organizer: {
-        Args: Record<PropertyKey, never>;
-        Returns: boolean;
-      };
-      next_problem_release: {
-        Args: Record<PropertyKey, never>;
-        Returns: string | null;
-      };
-      server_now: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
+      is_organizer: { Args: Record<PropertyKey, never>; Returns: boolean };
+      next_problem_release: { Args: Record<PropertyKey, never>; Returns: string };
+      server_now: { Args: Record<PropertyKey, never>; Returns: string };
     };
     Enums: {
       [_ in never]: never;
@@ -354,16 +362,114 @@ export interface Database {
       [_ in never]: never;
     };
   };
-}
+};
 
-export type Tables<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Row'];
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
 
-export type TablesInsert<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Insert'];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>];
 
-export type TablesUpdate<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Update'];
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    keyof DefaultSchema['Tables'] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    keyof DefaultSchema['Tables'] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    keyof DefaultSchema['Enums'] | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    keyof DefaultSchema['CompositeTypes'] | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never;
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const;
 
 export type Views<T extends keyof Database['public']['Views']> =
   Database['public']['Views'][T]['Row'];

@@ -138,7 +138,7 @@ insert into public.problem_statements (id, code, title, description, domain, dif
 values
   -- Released in the past (accessible to participants)
   (
-    'p1111111-0001-4000-a000-000000000001',
+    'f1111111-0001-4000-a000-000000000001',
     'PRB-AI-01',
     'Autonomous Multi-Modal Emergency Dispatch Routing',
     'Design a real-time dispatch coordinator that prioritizes emergency calls based on acoustic analysis and computes dynamic traffic routes across city corridors using live sensor telemetry.',
@@ -148,7 +148,7 @@ values
     now() - interval '1 day'
   ),
   (
-    'p1111111-0002-4000-a000-000000000002',
+    'f1111111-0002-4000-a000-000000000002',
     'PRB-FIN-02',
     'Decentralized Micro-Credit Verification for Rural Artisans',
     'Build a verifiable credential protocol enabling informal artisans to tokenize verified inventory and receive micro-loans without traditional collateral or credit history.',
@@ -159,7 +159,7 @@ values
   ),
   -- In the future (locked for participants, visible via next_problem_release countdown)
   (
-    'p1111111-0003-4000-a000-000000000003',
+    'f1111111-0003-4000-a000-000000000003',
     'PRB-HLT-03',
     'Edge-AI Predictive Diagnostics for Portable Ultrasound Devices',
     'Develop an ultra-low-latency on-device computer vision model to detect organ anomalies from portable point-of-care ultrasound devices in remote village healthcare clinics.',
@@ -169,7 +169,7 @@ values
     now()
   ),
   (
-    'p1111111-0004-4000-a000-000000000004',
+    'f1111111-0004-4000-a000-000000000004',
     'PRB-IOT-04',
     'Smart Campus Grid Anomaly Detection via LoRaWAN Telemetry',
     'Implement a predictive maintenance mesh network that monitors commercial campus transformer loads and water distribution valves to anticipate equipment failures.',
@@ -419,7 +419,7 @@ insert into public.leaderboard_entries (id, team_id, round_name, score, publishe
 values
   -- Round 1: Architecture & Feasibility
   (
-    'l1111111-0001-4000-a000-000000000001',
+    'f2111111-0001-4000-a000-000000000001',
     'd1111111-1111-4111-a111-111111111111',
     'Round 1: Architecture Review',
     85.0,
@@ -427,7 +427,7 @@ values
     now() - interval '6 hours'
   ),
   (
-    'l1111111-0002-4000-a000-000000000002',
+    'f2111111-0002-4000-a000-000000000002',
     'd2222222-2222-4222-a222-222222222222',
     'Round 1: Architecture Review',
     90.0,
@@ -435,7 +435,7 @@ values
     now() - interval '6 hours'
   ),
   (
-    'l1111111-0003-4000-a000-000000000003',
+    'f2111111-0003-4000-a000-000000000003',
     'd3333333-3333-4333-a333-333333333333',
     'Round 1: Architecture Review',
     85.0,
@@ -444,7 +444,7 @@ values
   ),
   -- Round 2: Prototype & Pitch Demonstration
   (
-    'l1111111-0004-4000-a000-000000000004',
+    'f2111111-0004-4000-a000-000000000004',
     'd1111111-1111-4111-a111-111111111111',
     'Round 2: Prototype Implementation',
     90.0,
@@ -452,7 +452,7 @@ values
     now() - interval '1 hour'
   ),
   (
-    'l1111111-0005-4000-a000-000000000005',
+    'f2111111-0005-4000-a000-000000000005',
     'd2222222-2222-4222-a222-222222222222',
     'Round 2: Prototype Implementation',
     85.0,
@@ -460,7 +460,7 @@ values
     now() - interval '1 hour'
   ),
   (
-    'l1111111-0006-4000-a000-000000000006',
+    'f2111111-0006-4000-a000-000000000006',
     'd3333333-3333-4333-a333-333333333333',
     'Round 2: Prototype Implementation',
     82.0,

@@ -45,6 +45,7 @@
   "devDependencies": {
     "@testing-library/react-native": "^14.1.0",
     "@types/jest": "~29.5.14",
+    "@types/pg": "^8.23.1",
     "@types/react": "~19.2.0",
     "docx": "^9.12.0",
     "eslint": "^9.39.5",
@@ -55,6 +56,7 @@
     "jest": "~29.7.0",
     "jest-expo": "~57.0.0",
     "lint-staged": "^17.6.0",
+    "pg": "^8.23.1",
     "prettier": "^3.9.10",
     "react-test-renderer": "19.2.3",
     "typescript": "~6.0.3"
@@ -71,7 +73,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "generate-docs": "node scripts/generate-doc.js",
-    "gen:types": "npx supabase gen types typescript --local > src/shared/types/database.ts",
+    "db:deploy": "node scripts/deploy-supabase.js",
+    "gen:types": "npx supabase gen types typescript --db-url \"${DATABASE_URL:-postgresql://postgres:Prayatna%40acm@db.cgpqcpyfrajzfdezqgnm.supabase.co:5432/postgres}\" --schema public > src/shared/types/database.ts",
     "import:participants": "node --experimental-strip-types --no-warnings scripts/import-participants.ts",
     "create:organizer": "node --experimental-strip-types --no-warnings scripts/create-organizer.ts",
     "prepare": "husky"

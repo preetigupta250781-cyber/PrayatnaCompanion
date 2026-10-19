@@ -150,22 +150,37 @@ The repository includes a comprehensive, realistic seed file at `supabase/migrat
 - **Published Leaderboard Scores with an Exact Tie:**
   - Round 1 and Round 2 scores creating an exact 175.0 point tie for Rank 1 between `Algorhythms` and `ByteCoders`.
 
-### Applying Seed Data:
+### Applying Database Schema & Seed Data:
 
-#### Using Supabase CLI:
+#### Automated One-Command Deploy:
+
+Run the automated deployment script against your Supabase instance:
 
 ```bash
-supabase db reset
-# or apply seed directly
-supabase db query < supabase/seed.sql
+npm run db:deploy
+```
+
+This script:
+
+1. Connects securely via SSL to your Supabase PostgreSQL database.
+2. Applies `supabase/migrations/0001_init.sql` (tables, RLS, functions, views, realtime).
+3. Applies `supabase/seed.sql` (sample teams, schedule, problems, announcements, transit routes, leaderboard).
+4. Verifies table counts and RPC health.
+
+#### Regenerating TypeScript Types:
+
+To synchronize TypeScript types after modifying database schemas or views:
+
+```bash
+npm run gen:types
 ```
 
 #### Using Supabase Web Dashboard:
 
 1. Open your Supabase Project Dashboard.
 2. Navigate to the **SQL Editor**.
-3. Copy and paste the contents of `supabase/seed.sql`.
-4. Click **Run**. All inserts use `ON CONFLICT DO UPDATE` or `DO NOTHING`, making the seed safe to re-run.
+3. Copy and paste the contents of `supabase/migrations/0001_init.sql` and click **Run**.
+4. Copy and paste the contents of `supabase/seed.sql` and click **Run**. All inserts use `ON CONFLICT DO UPDATE` or `DO NOTHING`, making the seed safe to re-run.
 
 ---
 

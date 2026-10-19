@@ -376,6 +376,17 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - Supports headings, code blocks with syntax tags, blockquotes with accent borders, bullet and numbered lists, horizontal rules, bold, italic, inline code, and links.
   - Performance-optimized to render large 5,000+ character problem descriptions smoothly without layout shift.
 
+### 4.14 Supabase Database Deployment & Type Synchronization (`scripts/deploy-supabase.js`, `supabase/`)
+
+- **Direct Cloud Deployment to Supabase (`cgpqcpyfrajzfdezqgnm`):**
+  - Connected securely via SSL to remote PostgreSQL cluster `db.cgpqcpyfrajzfdezqgnm.supabase.co`.
+  - Executed [`supabase/migrations/0001_init.sql`](file:///Users/aryan555/Documents/Projects/prayatna%20app/supabase/migrations/0001_init.sql), deploying all 9 tables (`teams`, `profiles`, `schedule_events`, `problem_statements`, `announcements`, `leaderboard_entries`, `bus_routes`, `bus_stops`, `bus_route_paths`), Row Level Security policies, RPC functions (`server_now()`, `next_problem_release()`, `is_organizer()`), triggers, and `supabase_realtime` publication.
+  - Executed [`supabase/seed.sql`](file:///Users/aryan555/Documents/Projects/prayatna%20app/supabase/seed.sql) with realistic seed records (3 teams, 10 events across 2 days including midnight crossing, 4 problem statements [2 released, 2 locked], 3 announcements, 2 bus transit routes with 10 stops and GPS polylines, published leaderboard with tie).
+  - Verified row counts and verified RPC functions: `server_now()` returns live IST time, `next_problem_release()` computes upcoming locked release timestamp.
+- **Automated Type Generation:**
+  - Synchronized database types directly from remote schema using `npx supabase gen types typescript --db-url` into [`src/shared/types/database.ts`](file:///Users/aryan555/Documents/Projects/prayatna%20app/src/shared/types/database.ts).
+  - Added `npm run db:deploy` script to `package.json` for one-command schema deployment and verification.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary

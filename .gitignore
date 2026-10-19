@@ -52,3 +52,6 @@ participants.csv
 credentials.csv
 *.csv
 
+# supabase cli temporary artifacts
+supabase/.temp/
+

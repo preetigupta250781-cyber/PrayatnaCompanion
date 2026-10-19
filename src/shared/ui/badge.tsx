@@ -15,6 +15,7 @@ export interface BadgeProps {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   accessibilityLabel?: string;
+  testID?: string;
 }
 
 export function Badge({
@@ -24,6 +25,7 @@ export function Badge({
   style,
   textStyle,
   accessibilityLabel,
+  testID,
 }: BadgeProps): React.JSX.Element {
   const theme = useAppTheme();
 
@@ -115,6 +117,7 @@ export function Badge({
 
   return (
     <View
+      testID={testID}
       accessible={true}
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel || `Badge: ${label}`}

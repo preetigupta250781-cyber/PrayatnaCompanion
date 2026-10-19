@@ -92,9 +92,20 @@ export function ScreenState<TData = unknown>({
     if (renderError) {
       return <View style={[styles.container, style]}>{renderError(activeError, handleRetry)}</View>;
     }
+
+    const errorMessage =
+      activeError &&
+      typeof activeError === 'object' &&
+      'userMessage' in activeError &&
+      typeof (activeError as { userMessage?: unknown }).userMessage === 'string'
+        ? (activeError as { userMessage: string }).userMessage
+        : activeError instanceof Error
+          ? activeError.message
+          : undefined;
+
     return (
       <View style={[styles.container, style]}>
-        <ErrorState onRetry={handleRetry} {...errorProps} />
+        <ErrorState onRetry={handleRetry} message={errorMessage} {...errorProps} />
       </View>
     );
   }

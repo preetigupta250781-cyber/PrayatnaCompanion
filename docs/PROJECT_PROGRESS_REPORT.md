@@ -387,6 +387,32 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - Synchronized database types directly from remote schema using `npx supabase gen types typescript --db-url` into [`src/shared/types/database.ts`](file:///Users/aryan555/Documents/Projects/prayatna%20app/src/shared/types/database.ts).
   - Added `npm run db:deploy` script to `package.json` for one-command schema deployment and verification.
 
+### 4.15 Live Real-Time Leaderboard (`src/features/leaderboard`, `app/(tabs)/leaderboard.tsx`)
+
+- **Top 3 Podium UI (`LeaderboardPodium.tsx` & `LeaderboardPodiumSlot.tsx`):**
+  - Displays top 3 teams on a visual podium: Rank 1 Gold center pillar (tallest), Rank 2 Silver left pillar, and Rank 3 Bronze right pillar.
+  - Gracefully handles ties (e.g. two teams tied for Rank 1 both receive gold styling and `#1` badges).
+  - Automatically highlights the current user's team on the podium with a `"YOU"` badge and glowing accent border.
+- **Ranked Standings List (`LeaderboardRowItem.tsx`):**
+  - Renders all remaining teams (Rank 4+) with rank badges, team names, join codes, score breakdowns, and user's team highlights.
+  - Live rank delta indicator: displays animated upward changes (`▲ +N` in green) and downward movements (`▼ -N` in red).
+  - Respects accessibility and reduce-motion: checks `useReducedMotion()`, disabling dynamic pulses when reduce-motion is enabled.
+- **Dense Ranking Algorithm & Tie Handling (`leaderboard-helpers.ts`):**
+  - Strict dense ranking implementation: teams with identical scores receive the exact same rank integer, and the immediate next team receives the subsequent integer without gap skipping (`1, 1, 2, 3...`).
+  - Handles teams without scores by placing them at the bottom with score 0 / `-`.
+  - Handles rounds without data by rendering `EmptyState` with message _"Results will appear once organizers publish them"_.
+- **Interactive Round Filters (`RoundFilterSelector.tsx`):**
+  - Dynamic horizontal chips for `"All Rounds"` and all distinct published rounds.
+  - Selecting a round dynamically re-computes each team's round score and re-ranks all teams with dense ranking.
+- **Authoritative "Last Updated" Timestamp:**
+  - Displays formatted IST time and relative duration (`hh:mm a 'IST' (X mins ago)`) derived from the latest score update or query cache invalidation.
+- **Jump to My Team Navigation:**
+  - Dynamic button (`"My Team #X"`) in the screen header.
+  - Automatically scrolls the `FlatList` to the current user's team position smoothly (scrolling to offset 0 for podium teams, or using `scrollToIndex` with fallback for list rows).
+- **Supabase Realtime Synchronization:**
+  - Subscribes to `leaderboard_entries` table changes via `useTableRealtime()`.
+  - Automatically invalidates query cache on scores published, updated, or recalculated.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -396,7 +422,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 49 test suites passed, 321/321 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 56 test suites passed, 361/361 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
@@ -404,12 +430,12 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 
 | Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
 | -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
-| `src/features/`            | 95.73%       | 83.21%     | 95.83%      | 95.69%     | **Exceeds 80%** |
+| `src/features/`            | 96.22%       | 84.82%     | 96.47%      | 96.52%     | **Exceeds 80%** |
 | `src/shared/hooks/`        | 96.87%       | 87.50%     | 92.85%      | 96.55%     | **Exceeds 80%** |
 | `src/shared/lib/`          | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
-| `src/shared/ui/`           | 94.84%       | 86.33%     | 100%        | 95.93%     | **Exceeds 80%** |
+| `src/shared/ui/`           | 94.86%       | 86.36%     | 100%        | 95.95%     | **Exceeds 80%** |
 | `src/shared/utils/`        | 99.12%       | 90.00%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **95.09%**   | **86.63%** | **93.95%**  | **95.37%** | **PASSED**      |
+| **All Monitored Files**    | **95.41%**   | **87.23%** | **94.65%**  | **95.73%** | **PASSED**      |
 
 ---
 
@@ -419,9 +445,12 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
   - Problem statements listing with server-corrected countdown card and difficulty badges.
   - Detail screen with safe markdown renderer (zero HTML injection).
   - Countdown reaching zero automatic transition and Realtime cache invalidation.
-- **Phase 4 (Live Real-Time Leaderboard):**
-  - Round-based leaderboard with podium top 3 display and tie handling.
-  - Real-time score publication synchronization via Supabase Realtime.
+- **Phase 4 (Live Real-Time Leaderboard):** **[COMPLETE]**
+  - Round-based leaderboard with podium top 3 display and dense rank tie handling.
+  - Dynamic round filter chips ("All Rounds" + individual rounds).
+  - User's team highlight and smooth scroll-to-my-team button.
+  - Real-time score publication synchronization via Supabase Realtime with reduce-motion rank delta animations.
+  - 5-state handling: `LeaderboardSkeleton` loading and `EmptyState` ("Results will appear once organizers publish them").
 - **Phase 5 (Campus Logistics & Transit):**
   - Campus bus route schedules, stops, and route visualization.
 - **Phase 6 (EAS Cloud Build & Store Submission):**

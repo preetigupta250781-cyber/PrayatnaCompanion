@@ -25,6 +25,7 @@ export interface ChipProps {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   accessibilityLabel?: string;
+  testID?: string;
 }
 
 export function Chip({
@@ -38,6 +39,7 @@ export function Chip({
   style,
   textStyle,
   accessibilityLabel,
+  testID,
 }: ChipProps): React.JSX.Element {
   const theme = useAppTheme();
 
@@ -145,6 +147,7 @@ export function Chip({
   if (isInteractive) {
     return (
       <TouchableOpacity
+        testID={testID}
         onPress={handlePress}
         disabled={disabled}
         activeOpacity={0.8}
@@ -164,6 +167,7 @@ export function Chip({
 
   return (
     <View
+      testID={testID}
       accessible={true}
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel || label}

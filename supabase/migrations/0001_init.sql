@@ -623,6 +623,7 @@ with team_scores as (
   from public.teams t
   left join public.leaderboard_entries le
     on le.team_id = t.id
+   and le.published = true
   group by t.id, t.name, t.team_code
 )
 select
@@ -634,7 +635,7 @@ select
   last_score_updated_at,
   rounds,
   dense_rank() over (
-    order by total_score desc, team_name asc
+    order by total_score desc
   ) as rank
 from team_scores;
 

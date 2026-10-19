@@ -7,7 +7,7 @@
 **Backend & Database:** Supabase (PostgreSQL with RLS, Realtime & Custom Storage Adapter)  
 **Monitoring & Error Reporting:** Sentry for React Native (`@sentry/react-native`)  
 **CI/CD Pipeline:** GitHub Actions & EAS Build  
-**Status:** Phase 1, 2, Database Schema, Auth & Core Event Features Complete (Schedule, Announcements, & Live Dashboard)  
+**Status:** Phase 1, 2, Database Schema, Auth, Core Event Features (Schedule & Announcements), and Problem Statements Track Feature Complete  
 **Last Updated:** October 2026
 
 ---
@@ -356,6 +356,26 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 - **Supabase Realtime Synchronization:**
   - Automated cache invalidation on database change notifications (`INSERT`, `UPDATE`, `DELETE`) for `schedule_events` and `announcements` tables via `useTableRealtime()`, with automatic fallback to 30s polling if socket connectivity drops.
 
+### 4.13 Problem Statements & Track Releases (`src/features/problems`, `app/(tabs)/problems.tsx`, `app/problems/[id].tsx`)
+
+- **Security & RLS Source of Truth:**
+  - Problem statements are strictly protected by database RLS (`release_at <= now() or is_organizer()`). Unreleased tracks are never leaked to participants over the network.
+- **Next Release Countdown & RPC Integration (`src/features/problems/components/LockedReleaseCard.tsx`):**
+  - Calls `supabase.rpc('next_problem_release')` returning the timestamp of the earliest future locked problem statement without exposing problem metadata.
+  - Live second-by-second countdown powered by authoritative server time (`useServerNow({ intervalMs: 1000 })`).
+  - Corrects for client device clock skew via calculated server offset.
+  - Automatically triggers `onCountdownZero` when the timer finishes, invalidating query caches and revealing newly released problem tracks with a smooth transition.
+  - Realtime integration via `useTableRealtime('problem_statements')` ensures instant updates when organizers release or modify problem statements.
+- **Problem List Tab Screen (`app/(tabs)/problems.tsx`):**
+  - Displays list of released problems with track code, title, domain chip, and difficulty badge (`getDifficultyBadgeVariant`).
+  - 5-State architecture: Loading (`ProblemCardSkeleton`), Error (`ErrorState` with retry), Empty (`EmptyState` displaying _"Problem statements will appear here when released"_ with `LockedReleaseCard` countdown rendered above it if an upcoming release is scheduled), Offline (`OfflineBanner`), and Success (`FlatList` with pull-to-refresh).
+  - Tapping any problem card routes to `/problems/[id]`.
+- **Detail Screen & Safe Markdown Rendering (`app/problems/[id].tsx` & `src/features/problems/components/MarkdownRenderer.tsx`):**
+  - Dedicated stack screen with accessible back button, track code, domain chip, difficulty badge, and formatted IST release timestamp.
+  - Custom `MarkdownRenderer` with `sanitizeHtml()` recursively stripping all HTML tags (`<script>`, `<iframe>`, `<img>`, etc.), completely eliminating HTML and XSS injection vectors.
+  - Supports headings, code blocks with syntax tags, blockquotes with accent borders, bullet and numbered lists, horizontal rules, bold, italic, inline code, and links.
+  - Performance-optimized to render large 5,000+ character problem descriptions smoothly without layout shift.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -365,7 +385,7 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 40 test suites passed, 278/278 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 49 test suites passed, 321/321 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Doctor Diagnostics**  | `npx expo-doctor`      | **PASS (Exit 0)** | 21/21 checks passed cleanly. Zero dependency or native configuration issues.        |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
@@ -373,20 +393,21 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 
 | Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
 | -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
-| `src/features/`            | 95.78%       | 84.15%     | 94.73%      | 95.80%     | **Exceeds 80%** |
+| `src/features/`            | 95.73%       | 83.21%     | 95.83%      | 95.69%     | **Exceeds 80%** |
 | `src/shared/hooks/`        | 96.87%       | 87.50%     | 92.85%      | 96.55%     | **Exceeds 80%** |
 | `src/shared/lib/`          | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
 | `src/shared/ui/`           | 94.84%       | 86.33%     | 100%        | 95.93%     | **Exceeds 80%** |
 | `src/shared/utils/`        | 99.12%       | 90.00%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **95.26%**   | **87.24%** | **93.12%**  | **95.65%** | **PASSED**      |
+| **All Monitored Files**    | **95.09%**   | **86.63%** | **93.95%**  | **95.37%** | **PASSED**      |
 
 ---
 
 ## 6. Strategic Roadmap for Subsequent Phases
 
-- **Phase 3 (Problem Statements & Submission Tracks):**
-  - Implement problem statement listings with release countdowns and difficulty tags.
-  - Track-specific filtering and detailed view screens.
+- **Phase 3 (Problem Statements & Submission Tracks):** **[COMPLETE]**
+  - Problem statements listing with server-corrected countdown card and difficulty badges.
+  - Detail screen with safe markdown renderer (zero HTML injection).
+  - Countdown reaching zero automatic transition and Realtime cache invalidation.
 - **Phase 4 (Live Real-Time Leaderboard):**
   - Round-based leaderboard with podium top 3 display and tie handling.
   - Real-time score publication synchronization via Supabase Realtime.

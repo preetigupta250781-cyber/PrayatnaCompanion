@@ -13,4 +13,7 @@ export const problemStatementSchema = z.object({
 
 export const problemStatementListSchema = z.array(problemStatementSchema);
 
+export const nextProblemReleaseSchema = z.string().nullable();
+
 export type ProblemStatement = z.infer<typeof problemStatementSchema>;
+export type NextProblemRelease = z.infer<typeof nextProblemReleaseSchema>;

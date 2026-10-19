@@ -602,6 +602,31 @@ function buildDocument() {
             spacing: { after: 200 },
           }),
 
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [
+              new TextRun({
+                text: '3.11 Problem Statements Track, Live Locked Countdown & Markdown Detail Screen',
+                bold: true,
+                size: 26,
+                color: PRIMARY_COLOR,
+              }),
+            ],
+            spacing: { before: 140, after: 80 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                'Engineered the Problem Statements track discovery and secure release module: ' +
+                  '(1) Database RLS & RPC Security: Problem statements are strictly protected by Postgres RLS (release_at <= now() or is_organizer()), completely hiding unreleased tracks from network access. Implemented rpc next_problem_release() to retrieve upcoming countdown targets without leaking problem metadata. ' +
+                  '(2) Locked Countdown Card (LockedReleaseCard): Displays live countdown ticking every second via useServerNow({ intervalMs: 1000 }), automatically correcting for client device clock skew. Seamlessly fires onCountdownZero when timer expires, invalidating TanStack query caches and revealing newly released problem statements. Subscribed to Realtime changes on problem_statements table. ' +
+                  '(3) Problem Statements List (app/(tabs)/problems.tsx): 5-state screen architecture with ProblemCardSkeleton, ErrorState with retry, and EmptyState ("Problem statements will appear here when released") with the Locked countdown card rendered above it if an upcoming release is scheduled. FlatList with pull-to-refresh and ProblemCard items displaying code, domain, difficulty, and excerpt. ' +
+                  '(4) Safe Markdown Detail Screen (app/problems/[id].tsx & MarkdownRenderer): Dedicated screen with accessible back button, metadata badges, and formatted IST release timestamp. Custom MarkdownRenderer with sanitizeHtml() stripping all HTML tags to prevent XSS/HTML injection, safely rendering headings, code blocks with syntax languages, blockquotes, ordered/unordered lists, and inline formatting for large 5,000+ character specifications.'
+              ),
+            ],
+            spacing: { after: 200 },
+          }),
+
           // Section 4: Quality Assurance & Test Verification
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
@@ -661,7 +686,7 @@ function buildDocument() {
                   createDataCell('npm run test:ci', 25, true),
                   createDataCell('PASSED', 15, true, true),
                   createDataCell(
-                    '40 test suites passed, 278/278 tests green. > 80% coverage.',
+                    '49 test suites passed, 321/321 tests green. > 80% coverage.',
                     35,
                     true
                   ),
@@ -708,11 +733,16 @@ function buildDocument() {
               }),
               new TableRow({
                 children: [
-                  createDataCell('src/features/ (Schedule, Announcements, Auth)', 30, false, true),
-                  createDataCell('95.78%', 17),
-                  createDataCell('84.15%', 17),
-                  createDataCell('94.73%', 18),
-                  createDataCell('95.80%', 18),
+                  createDataCell(
+                    'src/features/ (Problems, Schedule, Announcements, Auth)',
+                    30,
+                    false,
+                    true
+                  ),
+                  createDataCell('95.73%', 17),
+                  createDataCell('83.21%', 17),
+                  createDataCell('95.83%', 18),
+                  createDataCell('95.69%', 18),
                 ],
               }),
               new TableRow({
@@ -754,10 +784,10 @@ function buildDocument() {
               new TableRow({
                 children: [
                   createDataCell('All Monitored Codebase Files', 30, true, true),
-                  createDataCell('95.26%', 17, true, true),
-                  createDataCell('87.24%', 17, true, true),
-                  createDataCell('93.12%', 18, true, true),
-                  createDataCell('95.65%', 18, true, true),
+                  createDataCell('95.09%', 17, true, true),
+                  createDataCell('86.63%', 17, true, true),
+                  createDataCell('93.95%', 18, true, true),
+                  createDataCell('95.37%', 18, true, true),
                 ],
               }),
             ],
@@ -781,24 +811,27 @@ function buildDocument() {
 
           new Paragraph({
             children: [
-              new TextRun({ text: '• Phase 3 — Supabase Data Integration: ', bold: true }),
-              new TextRun(
-                'Build domain API services for schedules, problem statements, teams, and evaluations in src/features/<feature>/api/, exposed via TanStack Query custom hooks and strictly validated through Zod schemas.\n'
-              ),
-              new TextRun({ text: '• Phase 4 — Real-Time WebSocket Feeds: ', bold: true }),
-              new TextRun(
-                'Subscribe to Supabase Realtime channels for instant score calculation, leaderboard updates, and emergency hackathon announcements.\n'
-              ),
               new TextRun({
-                text: '• Phase 5 — Offline Caching & Interactive Campus Maps: ',
+                text: '• Phase 3 — Problem Statements & Track Releases [COMPLETE]: ',
                 bold: true,
               }),
               new TextRun(
-                'Integrate react-native-maps with indoor campus coordinates, caching schedule data locally via NetInfo + AsyncStorage for resilient offline access.\n'
+                'Released problem statement listings, time-locked release countdown with auto-transition, safe Markdown renderer with XSS prevention, and detail view.\n'
+              ),
+              new TextRun({ text: '• Phase 4 — Real-Time Leaderboard: ', bold: true }),
+              new TextRun(
+                'Build podium top 3 display, round-based evaluation filter, tie handling, and live score sync via Supabase Realtime.\n'
+              ),
+              new TextRun({
+                text: '• Phase 5 — Offline Caching & Transit Route Navigation: ',
+                bold: true,
+              }),
+              new TextRun(
+                'Campus bus route schedules, stops, and polyline route mapping with offline resilience.\n'
               ),
               new TextRun({ text: '• Phase 6 — Production Cloud Builds & EAS: ', bold: true }),
               new TextRun(
-                'Execute automated EAS builds with release profiles for Google Play Internal App Sharing and iOS TestFlight.'
+                'Execute automated EAS builds with release profiles for Google Play and iOS TestFlight.'
               ),
             ],
             spacing: { after: 200 },

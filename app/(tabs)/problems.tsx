@@ -1,185 +1,153 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
+import { FlatList, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LockedReleaseCard, ProblemCard, ProblemStatement, useProblems } from '@/features/problems';
 import { useAppTheme } from '@/shared/hooks/use-theme';
-
-interface ProblemTrack {
-  id: string;
-  code: string;
-  title: string;
-  category: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  description: string;
-}
-
-const PROBLEM_TRACKS: ProblemTrack[] = [
-  {
-    id: '1',
-    code: 'TRK-01',
-    title: 'Autonomous Campus Navigation & Safety',
-    category: 'AI & GeoSpatial',
-    difficulty: 'Advanced',
-    description:
-      'Design an intelligent routing system using live mapping and spatial anchors to guide visitors across complex multi-building campuses.',
-  },
-  {
-    id: '2',
-    code: 'TRK-02',
-    title: 'Offline-First Emergency Response Mesh',
-    category: 'Edge Computing & Networking',
-    difficulty: 'Advanced',
-    description:
-      'Build a peer-to-peer communication system that operates reliably when cellular infrastructure or power connectivity is impaired.',
-  },
-  {
-    id: '3',
-    code: 'TRK-03',
-    title: 'Community Micro-Finance & Transparent Grants',
-    category: 'FinTech & Web3',
-    difficulty: 'Intermediate',
-    description:
-      'Develop a fraud-resistant escrow and milestone tracking system for distributing localized grants with real-time auditability.',
-  },
-  {
-    id: '4',
-    code: 'TRK-04',
-    title: 'Predictive Medical Equipment Maintenance',
-    category: 'HealthTech & IoT',
-    difficulty: 'Intermediate',
-    description:
-      'Leverage telemetry logs and anomaly detection to alert clinic administrators before vital biomedical gear experiences failure.',
-  },
-];
+import { EmptyState, ProblemCardSkeleton, ScreenState, Text } from '@/shared/ui';
 
 export default function ProblemsScreen(): React.JSX.Element {
   const theme = useAppTheme();
+  const router = useRouter();
+
+  const {
+    problems,
+    nextRelease,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+    handleCountdownZero,
+  } = useProblems();
+
+  const handleSelectProblem = useCallback(
+    (problem: ProblemStatement) => {
+      router.push({
+        pathname: '/problems/[id]',
+        params: { id: problem.id },
+      });
+    },
+    [router]
+  );
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.content}
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
+      edges={['top', 'left', 'right']}
     >
-      <Text style={[styles.title, { color: theme.colors.text }]}>Problem Statements</Text>
-      <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-        Choose your track, review requirements, and verify submission criteria.
-      </Text>
-
-      <View style={styles.trackList}>
-        {PROBLEM_TRACKS.map((track) => (
-          <View
-            key={track.id}
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.colors.card,
-                borderColor: theme.colors.cardBorder,
-              },
-            ]}
-          >
-            <View style={styles.cardHeader}>
-              <View
-                style={[
-                  styles.codeBadge,
-                  {
-                    backgroundColor: theme.colors.surfaceElevated,
-                    borderColor: theme.colors.border,
-                  },
-                ]}
-              >
-                <Text style={[styles.codeText, { color: theme.colors.accent }]}>{track.code}</Text>
-              </View>
-              <Text style={[styles.categoryText, { color: theme.colors.textMuted }]}>
-                {track.category}
-              </Text>
-            </View>
-
-            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{track.title}</Text>
-            <Text style={[styles.cardDesc, { color: theme.colors.textSecondary }]}>
-              {track.description}
-            </Text>
-
-            <View style={styles.cardFooter}>
-              <Text style={[styles.difficultyLabel, { color: theme.colors.textMuted }]}>
-                Level:{' '}
-                <Text style={{ color: theme.colors.textSecondary, fontWeight: '700' }}>
-                  {track.difficulty}
-                </Text>
-              </Text>
-            </View>
-          </View>
-        ))}
+      {/* Screen Header */}
+      <View style={styles.header}>
+        <Text variant="h1" style={styles.title}>
+          Problem Statements
+        </Text>
+        <Text variant="bodySm" style={{ color: theme.colors.textSecondary }}>
+          Choose your track, review requirements, and verify submission criteria.
+        </Text>
       </View>
-    </ScrollView>
+
+      {/* 5-State Screen Container */}
+      <ScreenState
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => {
+          void refetch();
+        }}
+        skeleton={<ProblemCardSkeleton />}
+        isEmpty={problems.length === 0}
+        renderEmpty={() => (
+          <ScrollView
+            contentContainerStyle={styles.emptyContainer}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={() => {
+                  void refetch();
+                }}
+                tintColor={theme.colors.accent}
+                colors={[theme.colors.accent]}
+              />
+            }
+          >
+            {nextRelease ? (
+              <LockedReleaseCard
+                targetReleaseAt={nextRelease}
+                onCountdownZero={handleCountdownZero}
+                testID="locked-card-empty-state"
+              />
+            ) : null}
+            <View testID="empty-problems-state">
+              <EmptyState
+                title="No Problems Released"
+                message="Problem statements will appear here when released"
+              />
+            </View>
+          </ScrollView>
+        )}
+        style={styles.screenStateContainer}
+      >
+        <FlatList
+          data={problems}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <ProblemCard
+              problem={item}
+              onPress={handleSelectProblem}
+              testID={`problem-card-${item.code}`}
+            />
+          )}
+          ListHeaderComponent={
+            nextRelease ? (
+              <LockedReleaseCard
+                targetReleaseAt={nextRelease}
+                onCountdownZero={handleCountdownZero}
+                testID="locked-release-card"
+              />
+            ) : null
+          }
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => {
+                void refetch();
+              }}
+              tintColor={theme.colors.accent}
+              colors={[theme.colors.accent]}
+            />
+          }
+        />
+      </ScreenState>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
   },
-  content: {
-    padding: 20,
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
     letterSpacing: -0.5,
+    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-    marginBottom: 24,
+  screenStateContainer: {
+    flex: 1,
   },
-  trackList: {
-    gap: 14,
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
   },
-  card: {
-    padding: 18,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  codeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  codeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    lineHeight: 22,
-    marginBottom: 8,
-  },
-  cardDesc: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#1A2133',
-    paddingTop: 10,
-  },
-  difficultyLabel: {
-    fontSize: 12,
+  emptyContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    flexGrow: 1,
   },
 });

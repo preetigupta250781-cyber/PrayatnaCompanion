@@ -138,6 +138,7 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="announcements" options={{ headerShown: false }} />
+        <Stack.Screen name="problems/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="dev/ui-kit" options={{ headerShown: false }} />
       </Stack>

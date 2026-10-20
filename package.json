@@ -77,6 +77,7 @@
     "gen:types": "npx supabase gen types typescript --db-url \"${DATABASE_URL:-postgresql://postgres:Prayatna%40acm@db.cgpqcpyfrajzfdezqgnm.supabase.co:5432/postgres}\" --schema public > src/shared/types/database.ts",
     "import:participants": "node --experimental-strip-types --no-warnings scripts/import-participants.ts",
     "create:organizer": "node --experimental-strip-types --no-warnings scripts/create-organizer.ts",
+    "test:rls": "node --experimental-strip-types --no-warnings scripts/rls-test.ts",
     "prepare": "husky"
   },
   "private": true

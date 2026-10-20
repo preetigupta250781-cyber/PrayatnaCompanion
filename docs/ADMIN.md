@@ -184,8 +184,65 @@ npm run gen:types
 
 ---
 
-## 5. Security & Post-Import Checklist
+## 5. Automated Row-Level Security (RLS) Verification (`scripts/rls-test.ts`)
 
+To ensure that participants, organizers, and unauthenticated public clients strictly adhere to the Principle of Least Privilege, an automated security test suite verifies all database access controls against live Supabase endpoints.
+
+### Command Usage
+
+```bash
+npm run test:rls
+```
+
+Alternatively:
+
+```bash
+node --experimental-strip-types --no-warnings scripts/rls-test.ts
+```
+
+### The 7 Security Invariants Verified
+
+| #     | Security Invariant                      | Tested Behavior                                                                                                                                                                                                                                                                  | Enforcing Mechanism                                                                  |
+| ----- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **1** | **Future Problem Release Window**       | Participants cannot read problem statements with `release_at > now()`. Returns 0 rows.                                                                                                                                                                                           | `problem_statements_select_policy`                                                   |
+| **2** | **Unpublished Leaderboard Rounds**      | Participants cannot query scores where `published = false`. Returns 0 rows.                                                                                                                                                                                                      | `leaderboard_entries_select_policy` & `leaderboard_view` (`security_invoker = true`) |
+| **3** | **Participant Mutation Protection**     | Participants cannot `INSERT`, `UPDATE`, or `DELETE` announcements, schedule events, bus routes, or bus stops. Operations are rejected or 0 rows modified.                                                                                                                        | Organizer-only write policies (`is_organizer()`)                                     |
+| **4** | **Profile Tampering Prevention**        | Participants cannot escalate their `role` or tamper with `team_id`. Attempting to do so triggers an explicit database exception.                                                                                                                                                 | Trigger `trg_profiles_enforce_update_restrictions`                                   |
+| **5** | **Profile Row Isolation**               | Participants can only read their own profile row. Querying another participant's profile returns 0 rows.                                                                                                                                                                         | `profiles_select_policy` (`auth.uid() = id OR is_organizer()`)                       |
+| **6** | **Organizer Administrative Privileges** | Organizers have unrestricted access: can read future problems, read unpublished rounds, modify schedule/announcements/transit, and manage user teams and profiles.                                                                                                               | `is_organizer()` policy branches                                                     |
+| **7** | **Zero Unauthenticated Access**         | Unauthenticated callers (anon key without an active session) cannot read any records from protected tables (`profiles`, `teams`, `schedule_events`, `problem_statements`, `announcements`, `leaderboard_entries`, `bus_routes`, `bus_stops`, `bus_route_paths`). Returns 0 rows. | `TO authenticated` clause on all SELECT policies                                     |
+
+### Test Runner Output Format
+
+The test runner outputs an ASCII results table with per-assertion status, category, latency, and failure diagnostic messages. It exits with code `0` on 100% pass and code `1` if any invariant fails.
+
+```
+================================================================================
+                          ROW LEVEL SECURITY TEST RESULTS
+================================================================================
+┌──────┬────────┬─────────────────────────┬────────────────────────────────────────────────────────┬─────────┐
+│ ID   │ STATUS │ CATEGORY                │ ASSERTION                                              │ TIME    │
+├──────┼────────┼─────────────────────────┼────────────────────────────────────────────────────────┼─────────┤
+│ 1.1  │ PASS   │ Problem Statements      │ Participant CANNOT read problem statements with rel... │ 516ms   │
+...
+│ 7.9  │ PASS   │ Unauthenticated RLS     │ Unauthenticated client cannot read public.bus_route... │ 206ms   │
+└──────┴────────┴─────────────────────────┴────────────────────────────────────────────────────────┴─────────┘
+
+================================================================================
+                               SUMMARY REPORT
+================================================================================
+Total Invariants Tested : 38
+Passed Invariants       : 38
+Failed Invariants       : 0
+Overall Status          : ALL INVARIANTS SATISFIED ✅
+================================================================================
+```
+
+---
+
+## 6. Security & Post-Import Checklist
+
+- [ ] Run `npm run test:rls` before every deployment or migration to verify zero policy regressions.
 - [ ] Verify participant counts in the Supabase Dashboard under `Authentication -> Users` and `Table Editor -> profiles`.
 - [ ] Distribute temporary passwords to participants securely via official event mailers or SMS.
 - [ ] Instruct participants to change their password upon first login via the in-app settings screen.
@@ -197,3 +254,4 @@ npm run gen:types
   ```bash
   git status
   ```
+- [ ] Confirm no `SUPABASE_SERVICE_ROLE_KEY` or direct database connection strings are referenced in `src/` or `app/`.

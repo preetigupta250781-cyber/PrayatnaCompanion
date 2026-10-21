@@ -54,8 +54,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     'expo-secure-store',
-    '@sentry/react-native',
+    [
+      '@sentry/react-native/expo',
+      {
+        url: 'https://sentry.io/',
+        project: process.env.SENTRY_PROJECT || 'prayatna-companion',
+        organization: process.env.SENTRY_ORG || 'prayatna-acm',
+      },
+    ],
   ],
+  runtimeVersion: {
+    policy: 'appVersion',
+  },
+  updates: {
+    url: 'https://u.expo.dev/cgpqcpyfrajzfdezqgnm',
+  },
   experiments: {
     typedRoutes: true,
     reactCompiler: true,

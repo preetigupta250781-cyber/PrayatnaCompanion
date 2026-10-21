@@ -1,0 +1,71 @@
+appId: org.prayatna.companion
+---
+# ==============================================================================
+# Prayatna Companion E2E Flow: Complete Happy Path
+# Login -> Home -> Schedule -> Problems -> Leaderboard -> Bus Routes -> Logout
+# ==============================================================================
+
+- launchApp:
+    clearState: true
+
+# 1. Login Screen Verification & Authentication
+- assertVisible: 'PRAYATNA 2026 // HACKATHON'
+- assertVisible: 'HACKER EMAIL'
+- assertVisible: 'PASSWORD'
+
+- tapOn: 'participant@medicaps.ac.in'
+- inputText: ${PARTICIPANT_EMAIL:-participant1@prayatna.org}
+
+- tapOn: 'Enter your password'
+- inputText: ${PARTICIPANT_PASSWORD:-Prayatna2026!}
+
+# Dismiss keyboard and submit
+- hideKeyboard
+- tapOn: 'SIGN IN'
+
+# 2. Home Screen
+- assertVisible:
+    text: '.*Hello,.*'
+- assertVisible: 'PRAYATNA 2026 DASHBOARD'
+
+# 3. Schedule Tab Navigation
+- tapOn: 'Schedule'
+- assertVisible: 'Schedule'
+- assertVisible: 'Prayatna 2026 Timeline • Indian Standard Time (IST)'
+
+# 4. Problems Tab Navigation
+- tapOn: 'Problems'
+- assertVisible: 'Problem Statements'
+- assertVisible: 'Choose your track, review requirements, and verify submission criteria.'
+
+# 5. Leaderboard Tab Navigation
+- tapOn: 'Leaderboard'
+- assertVisible: 'Leaderboard'
+- assertVisible: 'LIVE'
+
+# 6. More Tab & Bus Routes Navigation
+- tapOn: 'More'
+- assertVisible: 'More & Account'
+- assertVisible: 'TRANSIT & LOGISTICS'
+
+# Enter Bus Routes
+- tapOn: 'Bus Routes'
+- assertVisible: 'Bus Routes & Transit'
+- assertVisible: 'Routes are updated manually by organizers. Live tracking is not available.'
+
+# Navigate back from Bus Routes to More
+- tapOn: 'Go back'
+- assertVisible: 'More & Account'
+
+# 7. Logout & Confirmation
+- scrollUntilVisible:
+    element: 'SIGN OUT'
+    direction: DOWN
+- tapOn: 'SIGN OUT'
+
+# Confirm Sign Out dialog
+- tapOn: 'Sign Out'
+
+# Verify returned to Login Screen
+- assertVisible: 'PRAYATNA 2026 // HACKATHON'
+- assertVisible: 'HACKER EMAIL'

@@ -1,0 +1,33 @@
+appId: org.prayatna.companion
+---
+# ==============================================================================
+# Prayatna Companion E2E Flow: Failed Login Authentication
+# Tests invalid credentials handling, error alert visibility, and zero-leak state
+# ==============================================================================
+
+- launchApp:
+    clearState: true
+
+# 1. Login Screen Verification
+- assertVisible: 'PRAYATNA 2026 // HACKATHON'
+- assertVisible: 'HACKER EMAIL'
+- assertVisible: 'PASSWORD'
+
+# 2. Enter Invalid Credentials
+- tapOn: 'participant@medicaps.ac.in'
+- inputText: 'invalid.participant@medicaps.ac.in'
+
+- tapOn: 'Enter your password'
+- inputText: 'IncorrectPass#999'
+
+# 3. Submit
+- hideKeyboard
+- tapOn: 'SIGN IN'
+
+# 4. Verify Error Message & State
+- assertVisible: 'Invalid email or password. Please verify your credentials.'
+
+# 5. Verify User Remains on Login Screen
+- assertVisible: 'HACKER EMAIL'
+- assertVisible: 'SIGN IN'
+- assertNotVisible: 'PRAYATNA 2026 DASHBOARD'

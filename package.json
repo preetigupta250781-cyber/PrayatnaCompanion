@@ -78,6 +78,9 @@
     "import:participants": "node --experimental-strip-types --no-warnings scripts/import-participants.ts",
     "create:organizer": "node --experimental-strip-types --no-warnings scripts/create-organizer.ts",
     "test:rls": "node --experimental-strip-types --no-warnings scripts/rls-test.ts",
+    "e2e": "maestro test maestro/",
+    "e2e:happy": "maestro test maestro/happy-path.yaml",
+    "e2e:failure": "maestro test maestro/login-failure.yaml",
     "prepare": "husky"
   },
   "private": true

@@ -19,7 +19,7 @@ export interface LeaderboardRowItemProps {
   testID?: string;
 }
 
-export function LeaderboardRowItem({
+function LeaderboardRowItemComponent({
   team,
   isUserTeam = false,
   testID,
@@ -165,6 +165,8 @@ export function LeaderboardRowItem({
     </Card>
   );
 }
+
+export const LeaderboardRowItem = React.memo(LeaderboardRowItemComponent);
 
 const styles = StyleSheet.create({
   card: {

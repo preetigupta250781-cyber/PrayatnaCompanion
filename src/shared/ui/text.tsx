@@ -56,6 +56,7 @@ export function Text({
   return (
     <RNText
       allowFontScaling={allowFontScaling}
+      maxFontSizeMultiplier={restProps.maxFontSizeMultiplier ?? 2.0}
       style={[
         variantStyle,
         {

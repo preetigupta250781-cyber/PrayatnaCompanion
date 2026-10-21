@@ -60,6 +60,16 @@ export default function LeaderboardScreen(): React.JSX.Element {
 
   const remainingTeams = rankedTeams.slice(3);
 
+  const renderLeaderboardRow = useCallback(
+    ({ item }: { item: RankedTeamItem }) => (
+      <LeaderboardRowItem
+        team={item}
+        isUserTeam={Boolean(userTeamId && item.team_id === userTeamId)}
+      />
+    ),
+    [userTeamId]
+  );
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
@@ -77,6 +87,7 @@ export default function LeaderboardScreen(): React.JSX.Element {
             <TouchableOpacity
               onPress={handleScrollToMyTeam}
               activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={[
                 styles.myTeamButton,
                 {
@@ -162,12 +173,11 @@ export default function LeaderboardScreen(): React.JSX.Element {
           ref={flatListRef}
           data={remainingTeams}
           keyExtractor={(item) => item.team_id}
-          renderItem={({ item }) => (
-            <LeaderboardRowItem
-              team={item}
-              isUserTeam={Boolean(userTeamId && item.team_id === userTeamId)}
-            />
-          )}
+          renderItem={renderLeaderboardRow}
+          initialNumToRender={8}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -240,9 +250,11 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   myTeamButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 22,
     borderWidth: 1,
   },
   statusRow: {

@@ -34,6 +34,13 @@ export default function AnnouncementsScreen(): React.JSX.Element {
     return sortedAnnouncements.filter((item) => item.priority === activeFilter);
   }, [sortedAnnouncements, activeFilter]);
 
+  const renderAnnouncementItem = React.useCallback(
+    ({ item }: { item: (typeof filteredAnnouncements)[0] }) => (
+      <AnnouncementCard announcement={item} />
+    ),
+    []
+  );
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
@@ -119,7 +126,11 @@ export default function AnnouncementsScreen(): React.JSX.Element {
           <FlatList
             data={filteredAnnouncements}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <AnnouncementCard announcement={item} />}
+            renderItem={renderAnnouncementItem}
+            initialNumToRender={8}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             refreshControl={

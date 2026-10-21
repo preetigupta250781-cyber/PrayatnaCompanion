@@ -14,7 +14,7 @@ export interface DaySelectorProps {
   onSelectDay: (key: string) => void;
 }
 
-export function DaySelector({
+function DaySelectorComponent({
   days,
   selectedKey,
   onSelectDay,
@@ -44,6 +44,8 @@ export function DaySelector({
     </View>
   );
 }
+
+export const DaySelector = React.memo(DaySelectorComponent);
 
 const styles = StyleSheet.create({
   container: {

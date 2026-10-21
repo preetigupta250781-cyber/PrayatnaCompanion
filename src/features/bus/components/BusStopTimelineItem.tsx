@@ -16,7 +16,7 @@ export interface BusStopTimelineItemProps {
   isLast?: boolean;
 }
 
-export function BusStopTimelineItem({
+function BusStopTimelineItemComponent({
   stop,
   index,
   isSelected = false,
@@ -112,6 +112,8 @@ export function BusStopTimelineItem({
     </TouchableOpacity>
   );
 }
+
+export const BusStopTimelineItem = React.memo(BusStopTimelineItemComponent);
 
 const styles = StyleSheet.create({
   container: {

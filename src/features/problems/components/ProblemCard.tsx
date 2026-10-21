@@ -20,7 +20,11 @@ export interface ProblemCardProps {
 /**
  * Interactive card displaying a released problem statement summary
  */
-export function ProblemCard({ problem, onPress, testID }: ProblemCardProps): React.JSX.Element {
+export function ProblemCardComponent({
+  problem,
+  onPress,
+  testID,
+}: ProblemCardProps): React.JSX.Element {
   const theme = useAppTheme();
   const difficultyVariant = getDifficultyBadgeVariant(problem.difficulty);
   const formattedDifficulty = formatDifficulty(problem.difficulty);
@@ -72,6 +76,8 @@ export function ProblemCard({ problem, onPress, testID }: ProblemCardProps): Rea
     </Card>
   );
 }
+
+export const ProblemCard = React.memo(ProblemCardComponent);
 
 const styles = StyleSheet.create({
   card: {

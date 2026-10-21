@@ -32,6 +32,17 @@ export default function ProblemsScreen(): React.JSX.Element {
     [router]
   );
 
+  const renderProblemItem = useCallback(
+    ({ item }: { item: ProblemStatement }) => (
+      <ProblemCard
+        problem={item}
+        onPress={handleSelectProblem}
+        testID={`problem-card-${item.code}`}
+      />
+    ),
+    [handleSelectProblem]
+  );
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
@@ -91,13 +102,11 @@ export default function ProblemsScreen(): React.JSX.Element {
         <FlatList
           data={problems}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ProblemCard
-              problem={item}
-              onPress={handleSelectProblem}
-              testID={`problem-card-${item.code}`}
-            />
-          )}
+          renderItem={renderProblemItem}
+          initialNumToRender={6}
+          maxToRenderPerBatch={8}
+          windowSize={5}
+          removeClippedSubviews={true}
           ListHeaderComponent={
             nextRelease ? (
               <LockedReleaseCard

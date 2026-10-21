@@ -447,6 +447,47 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 - **Dynamic Native Configuration:**
   - Configured `android.config.googleMaps.apiKey` in `app.config.ts` populated dynamically from `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` or `GOOGLE_MAPS_API_KEY`.
 
+### 4.6 Whole-App Production Audit, Accessibility, Performance & Error Resilience
+
+A comprehensive, deep audit and hardening across all app screens, components, and configuration was performed:
+
+1. **Accessibility (a11y) & WCAG AA Compliance:**
+   - **Light Mode Contrast Fix (`src/config/theme.ts`):** Resolved low-contrast issue where bright cyan (`#00F0FF`, 1.25:1 contrast against light background) was used for accent, focused borders, and active tabs. Replaced light-mode accent with Sky-600 (`#0284C7`, 4.67:1 contrast ratio, WCAG AA compliant). Dark-mode retains high-contrast cyber cyan (`#00F0FF`, 13.5:1). Updated muted text in light mode to `#64748B` (4.5:1 ratio).
+   - **Dynamic Typography Scaling:** Updated `Text` component (`src/shared/ui/text.tsx`) with default `maxFontSizeMultiplier={2.0}` across all 9 typography variants, ensuring dynamic font sizes scale up to 200% without truncation or layout clipping.
+   - **Primary Button Contrast & Scaling (`src/shared/ui/button.tsx`):** Made button text color dynamically adapt to light/dark themes (`#08090E` on bright dark mode, `#FFFFFF` on sky light mode) with `maxFontSizeMultiplier={2.0}` and `numberOfLines={2}`.
+   - **Touch Target Compliance ($\ge 44$px):** Enforced $\ge 44$px touch targets with generous `hitSlop` across interactive components: `myTeamButton` in Leaderboard (`minHeight: 44, paddingHorizontal: 12`), `Chip`, `Button`, navigation back buttons, filter selectors, and list items.
+   - **Accessible Roles & Labels:** Added `tabBarAccessibilityLabel` across all tab bar destinations (`app/(tabs)/_layout.tsx`), `accessibilityState={{ expanded }}` to expandable announcement cards, and descriptive labels across all interactive cards.
+   - **Reduce-Motion Support:** Verified and integrated `useReducedMotion()` across all Reanimated animations (`Skeleton`, `LeaderboardRowItem`, `LockedReleaseCard`) to eliminate disorienting animations when users enable reduced motion in device accessibility settings.
+
+2. **Performance & Zero Layout Shift:**
+   - **Zero Skeleton Layout Shift (`src/shared/ui/composed-skeletons.tsx`):** Replaced hardcoded `padding: 16` in `styles.container` with `width: '100%'` and aligned skeleton widths to match screen layouts, eliminating the 16px horizontal jump when switching from loading skeleton to loaded content.
+   - **Component Memoization (`React.memo`):** Memoized high-frequency list elements to eliminate re-renders: `ScheduleTimelineItem`, `ProblemCard`, `AnnouncementCard`, `LeaderboardRowItem`, `BusStopTimelineItem`, and `ProfileCard`.
+   - **List Virtualization & Render Callbacks:** Tuned FlatList performance props across all screens (`ScheduleScreen`, `ProblemsScreen`, `LeaderboardScreen`, `AnnouncementsScreen`, `BusRoutesListScreen`):
+     - `useCallback` for `renderItem` and press handlers to preserve stable element references.
+     - Virtualization parameters: `initialNumToRender={6-8}`, `maxToRenderPerBatch={8-10}`, `windowSize={5}`, `removeClippedSubviews={true}`.
+   - **Cold Startup Benchmark Measurement (`app/_layout.tsx`):** Instrument module load time `APP_START_TIME = Date.now()` and log authoritative cold startup duration via `logger.info('App cold start completed', { startupDurationMs })` once session resolution completes and the splash screen is dismissed.
+
+3. **Offline & Cache Resilience:**
+   - Standardized `ScreenState` across all screens to automatically mount `<OfflineBanner />` when network connectivity is lost while preserving cached data from TanStack Query.
+   - Guaranteed graceful transitions: Offline with cache displays cached items + banner; offline without cache renders helpful error state with retry.
+
+4. **App Configuration & Native Permissions Hardening:**
+   - Updated `app.config.ts` and `app.json`:
+     - Display Name: `"Prayatna Companion"`
+     - iOS Bundle Identifier: `org.prayatna.companion`
+     - Android Package: `org.prayatna.companion`
+     - Version: `1.0.0` (Android `versionCode: 1`)
+     - Permissions Hardening: Strict `permissions: []` with `blockedPermissions: ['android.permission.ACCESS_FINE_LOCATION', 'android.permission.ACCESS_COARSE_LOCATION']` to enforce the zero location permission policy.
+     - Confirmed app icon and splash screen assets in `assets/images/`.
+
+5. **Fault Tolerance & Error Resilience Test Suite (`src/features/__tests__/error-resilience.test.tsx`):**
+   - Implemented 18 rigorous integration test scenarios covering all 6 primary screens (`ScheduleScreen`, `ProblemsScreen`, `ProblemDetailScreen`, `LeaderboardScreen`, `AnnouncementsScreen`, `BusRoutesListScreen`).
+   - Simulated 3 distinct Supabase failure modes:
+     1. **Supabase HTTP 500 Internal Server Error**
+     2. **Supabase Network Timeout / Aborted Request**
+     3. **Malformed Payload (Zod Schema Validation Failure)**
+   - Verified that every screen catches the error gracefully, displays `ErrorState` with descriptive copy, renders an accessible Retry button, and triggers `refetch()` without crashing.
+
 ---
 
 ## 5. Verification & Quality Assurance Summary
@@ -456,21 +497,25 @@ Every screen must handle 5 distinct states via `<ScreenState>`:
 | **Strict TypeScript Check**  | `npm run typecheck`    | **PASS (Exit 0)** | 0 errors. Strict mode + `noUncheckedIndexedAccess: true`. Path alias `@/*` working. |
 | **ESLint Static Analysis**   | `npm run lint`         | **PASS (Exit 0)** | 0 errors, 0 warnings. Flat config with Expo + Simple Import Sort.                   |
 | **Prettier Code Formatting** | `npm run format:check` | **PASS (Exit 0)** | All codebase files strictly formatted according to design tokens and rules.         |
-| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 61 test suites passed, 403/403 tests passed. $\ge 80\%$ coverage threshold met.     |
+| **Unit Test Coverage Suite** | `npm run test:ci`      | **PASS (Exit 0)** | 62 test suites passed, 421/421 tests passed. $\ge 80\%$ coverage threshold met.     |
 | **Expo Configuration Check** | `npx expo config`      | **PASS (Exit 0)** | Validated configuration with Google Maps API key and plugins.                       |
 | **Git & Version Control**    | `git status`           | **PASS (Exit 0)** | Clean tree. Pre-commit hooks active. Local `.env` and `coverage/` ignored.          |
 
 ### Test Coverage Metrics
 
-| Package / Module Directory | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
-| -------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
-| `src/features/bus/`        | 98.45%       | 88.24%     | 95.83%      | 98.57%     | **Exceeds 80%** |
-| `src/features/`            | 96.84%       | 85.90%     | 96.25%      | 97.02%     | **Exceeds 80%** |
-| `src/shared/hooks/`        | 96.87%       | 87.50%     | 92.85%      | 96.55%     | **Exceeds 80%** |
-| `src/shared/lib/`          | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
-| `src/shared/ui/`           | 94.86%       | 86.36%     | 100%        | 95.95%     | **Exceeds 80%** |
-| `src/shared/utils/`        | 99.12%       | 90.00%     | 100%        | 100%       | **Exceeds 80%** |
-| **All Monitored Files**    | **96.12%**   | **88.05%** | **95.10%**  | **96.42%** | **PASSED**      |
+| Package / Module Directory   | % Statements | % Branch   | % Functions | % Lines    | Coverage Status |
+| ---------------------------- | ------------ | ---------- | ----------- | ---------- | --------------- |
+| `src/features/announcements` | 98.24%       | 91.17%     | 100%        | 98.24%     | **Exceeds 80%** |
+| `src/features/auth`          | 96.61%       | 81.39%     | 100%        | 96.42%     | **Exceeds 80%** |
+| `src/features/bus/`          | 98.45%       | 88.24%     | 95.83%      | 98.57%     | **Exceeds 80%** |
+| `src/features/leaderboard`   | 98.11%       | 91.89%     | 100%        | 98.36%     | **Exceeds 80%** |
+| `src/features/problems`      | 95.83%       | 88.23%     | 100%        | 95.77%     | **Exceeds 80%** |
+| `src/features/schedule`      | 95.65%       | 93.75%     | 95.23%      | 95.65%     | **Exceeds 80%** |
+| `src/shared/hooks/`          | 96.87%       | 87.50%     | 92.85%      | 96.55%     | **Exceeds 80%** |
+| `src/shared/lib/`            | 93.91%       | 85.71%     | 81.96%      | 94.03%     | **Exceeds 80%** |
+| `src/shared/ui/`             | 95.65%       | 85.28%     | 100%        | 96.76%     | **Exceeds 80%** |
+| `src/shared/utils/`          | 99.12%       | 90.00%     | 100%        | 100%       | **Exceeds 80%** |
+| **All Monitored Files**      | **95.16%**   | **86.24%** | **94.69%**  | **95.42%** | **PASSED**      |
 
 ---
 

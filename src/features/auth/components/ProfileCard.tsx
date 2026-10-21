@@ -10,7 +10,7 @@ export interface ProfileCardProps {
   profile: ProfileWithTeam;
 }
 
-export function ProfileCard({ profile }: ProfileCardProps): React.JSX.Element {
+function ProfileCardComponent({ profile }: ProfileCardProps): React.JSX.Element {
   const theme = useAppTheme();
   const team = profile.team;
   const isOrganizer = profile.role === 'organizer';
@@ -77,6 +77,8 @@ export function ProfileCard({ profile }: ProfileCardProps): React.JSX.Element {
     </View>
   );
 }
+
+export const ProfileCard = React.memo(ProfileCardComponent);
 
 const styles = StyleSheet.create({
   container: {

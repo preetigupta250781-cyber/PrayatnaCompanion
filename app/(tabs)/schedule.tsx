@@ -44,6 +44,13 @@ export default function ScheduleScreen(): React.JSX.Element {
     return filterEventsByDay(events, selectedDayKey);
   }, [events, selectedDayKey]);
 
+  const renderTimelineItem = React.useCallback(
+    ({ item }: { item: (typeof filteredEvents)[0] }) => (
+      <ScheduleTimelineItem event={item} isCurrent={isEventActive(item, serverNow)} />
+    ),
+    [serverNow]
+  );
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.colors.background }]}
@@ -92,9 +99,11 @@ export default function ScheduleScreen(): React.JSX.Element {
           <FlatList
             data={filteredEvents}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <ScheduleTimelineItem event={item} isCurrent={isEventActive(item, serverNow)} />
-            )}
+            renderItem={renderTimelineItem}
+            initialNumToRender={8}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             refreshControl={

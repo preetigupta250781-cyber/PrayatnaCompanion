@@ -77,10 +77,10 @@ export function Button({
             elevation: 4,
           },
           text: {
-            color: '#08090E', // Dark contrast on neon accent
+            color: theme.isDark ? '#08090E' : '#FFFFFF',
             fontWeight: '700',
           },
-          indicator: '#08090E',
+          indicator: theme.isDark ? '#08090E' : '#FFFFFF',
         };
       case 'secondary':
         return {
@@ -222,7 +222,9 @@ export function Button({
             {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
             {title ? (
               <Text
-                numberOfLines={1}
+                numberOfLines={2}
+                allowFontScaling={true}
+                maxFontSizeMultiplier={2.0}
                 style={[styles.baseText, sizeStyle.text, variantStyle.text, textStyle]}
               >
                 {title}

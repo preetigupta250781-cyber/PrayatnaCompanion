@@ -12,9 +12,12 @@ export default function BusRoutesListScreen(): React.JSX.Element {
   const router = useRouter();
   const { routes, isLoading, isError, error, refetch, isRefetching } = useBusRoutes();
 
-  const handleRoutePress = (route: BusRoute): void => {
-    router.push(`/bus/${route.id}` as any);
-  };
+  const handleRoutePress = React.useCallback(
+    (route: BusRoute): void => {
+      router.push(`/bus/${route.id}` as any);
+    },
+    [router]
+  );
 
   const handleBack = (): void => {
     if (router.canGoBack()) {
@@ -23,6 +26,11 @@ export default function BusRoutesListScreen(): React.JSX.Element {
       router.replace('/(tabs)/more');
     }
   };
+
+  const renderRouteItem = React.useCallback(
+    ({ item }: { item: BusRoute }) => <BusRouteCard route={item} onPress={handleRoutePress} />,
+    [handleRoutePress]
+  );
 
   return (
     <SafeAreaView
@@ -79,7 +87,11 @@ export default function BusRoutesListScreen(): React.JSX.Element {
         <FlatList
           data={routes}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <BusRouteCard route={item} onPress={handleRoutePress} />}
+          renderItem={renderRouteItem}
+          initialNumToRender={6}
+          maxToRenderPerBatch={8}
+          windowSize={5}
+          removeClippedSubviews={true}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={

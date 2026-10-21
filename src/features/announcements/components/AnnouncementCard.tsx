@@ -15,7 +15,7 @@ export interface AnnouncementCardProps {
   defaultExpanded?: boolean;
 }
 
-export function AnnouncementCard({
+export function AnnouncementCardComponent({
   announcement,
   now,
   defaultExpanded = false,
@@ -78,6 +78,7 @@ export function AnnouncementCard({
           onPress={() => setIsExpanded((prev) => !prev)}
           accessible={true}
           accessibilityRole="button"
+          accessibilityState={{ expanded: isExpanded }}
           accessibilityLabel={
             isExpanded ? 'Collapse announcement body text' : 'Expand full announcement body text'
           }
@@ -92,6 +93,8 @@ export function AnnouncementCard({
     </Card>
   );
 }
+
+export const AnnouncementCard = React.memo(AnnouncementCardComponent);
 
 const styles = StyleSheet.create({
   card: {

@@ -1,19 +1,23 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 import { useAppTheme } from '@/shared/hooks/use-theme';
 
 import { Card } from './card';
 import { Skeleton } from './skeleton';
 
+export interface ComposedSkeletonProps {
+  style?: StyleProp<ViewStyle>;
+}
+
 /**
  * 1. HomeSkeleton: Matches the Hackathon Home Overview layout
  */
-export function HomeSkeleton(): React.JSX.Element {
+export function HomeSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
-    <View style={styles.container} accessible={false}>
+    <View style={[styles.homeContainer, style]} accessible={false}>
       {/* Header Profile Bar */}
       <View style={styles.rowBetween}>
         <View style={styles.flex1}>
@@ -65,11 +69,11 @@ export function HomeSkeleton(): React.JSX.Element {
 /**
  * 2. ScheduleSkeleton: Matches the Timeline and Schedule layout
  */
-export function ScheduleSkeleton(): React.JSX.Element {
+export function ScheduleSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
-    <View style={styles.container} accessible={false}>
+    <View style={[styles.container, style]} accessible={false}>
       {/* Day Selector Pills */}
       <View style={styles.pillsRow}>
         <Skeleton width={80} height={38} borderRadius={theme.radius.full} style={styles.mr8} />
@@ -105,11 +109,11 @@ export function ScheduleSkeleton(): React.JSX.Element {
 /**
  * 3. AnnouncementListSkeleton: Matches Announcements feed layout
  */
-export function AnnouncementListSkeleton(): React.JSX.Element {
+export function AnnouncementListSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
-    <View style={styles.container} accessible={false}>
+    <View style={[styles.container, style]} accessible={false}>
       {/* Category Filter Chips */}
       <View style={styles.pillsRow}>
         <Skeleton width={60} height={34} borderRadius={theme.radius.full} style={styles.mr8} />
@@ -140,11 +144,11 @@ export function AnnouncementListSkeleton(): React.JSX.Element {
 /**
  * 4. ProblemCardSkeleton: Matches Problem Statements list layout
  */
-export function ProblemCardSkeleton(): React.JSX.Element {
+export function ProblemCardSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
-    <View style={styles.container} accessible={false}>
+    <View style={[styles.container, style]} accessible={false}>
       {[1, 2].map((index) => (
         <Card key={index} variant="default" style={styles.cardSpacing}>
           <View style={styles.rowBetween}>
@@ -167,7 +171,7 @@ export function ProblemCardSkeleton(): React.JSX.Element {
 /**
  * 5. LeaderboardSkeleton: Matches Podium (top 3) + Ranking Rows layout
  */
-export function LeaderboardSkeleton(): React.JSX.Element {
+export function LeaderboardSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
@@ -246,11 +250,11 @@ export function LeaderboardSkeleton(): React.JSX.Element {
 /**
  * 6. BusRouteListSkeleton: Matches Campus Transit logistics layout
  */
-export function BusRouteListSkeleton(): React.JSX.Element {
+export function BusRouteListSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
-    <View style={styles.container} accessible={false}>
+    <View style={[styles.container, style]} accessible={false}>
       {/* Route Switcher Pills */}
       <View style={styles.pillsRow}>
         <Skeleton width={130} height={38} borderRadius={theme.radius.full} style={styles.mr8} />
@@ -294,11 +298,11 @@ export function BusRouteListSkeleton(): React.JSX.Element {
 /**
  * 7. ProfileCardSkeleton: Matches Profile and Team details layout
  */
-export function ProfileCardSkeleton(): React.JSX.Element {
+export function ProfileCardSkeleton({ style }: ComposedSkeletonProps = {}): React.JSX.Element {
   const theme = useAppTheme();
 
   return (
-    <View style={styles.container} accessible={false}>
+    <View style={[styles.profileSkeletonContainer, style]} accessible={false}>
       {/* Profile Header Card */}
       <Card variant="elevated" style={[styles.cardSpacing, styles.alignCenter]}>
         <Skeleton width={72} height={72} borderRadius={36} />
@@ -333,7 +337,14 @@ export function ProfileCardSkeleton(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    width: '100%',
+  },
+  homeContainer: {
+    padding: 20,
+    width: '100%',
+  },
+  profileSkeletonContainer: {
+    width: '100%',
   },
   cardSpacing: {
     marginBottom: 14,

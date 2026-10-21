@@ -17,6 +17,9 @@ import { ErrorBoundary } from '@/shared/ui';
 // Initialize Sentry with environment & release tags
 initSentry();
 
+// Benchmark cold startup time
+const APP_START_TIME = Date.now();
+
 // Keep splash screen visible until auth session is resolved
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -98,9 +101,11 @@ function NavigationWithAuthGate(): React.JSX.Element | null {
     };
   }, [setSession, setProfile, setIsInitialized, signOut]);
 
-  // Hide splash screen once initial session is resolved
+  // Hide splash screen once initial session is resolved and record startup time
   useEffect(() => {
     if (isInitialized) {
+      const startupDurationMs = Date.now() - APP_START_TIME;
+      logger.info('App cold start completed', { startupDurationMs });
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [isInitialized]);

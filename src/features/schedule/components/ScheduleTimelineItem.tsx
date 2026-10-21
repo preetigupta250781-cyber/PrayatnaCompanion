@@ -12,7 +12,7 @@ export interface ScheduleTimelineItemProps {
   isCurrent: boolean;
 }
 
-export function ScheduleTimelineItem({
+export function ScheduleTimelineItemComponent({
   event,
   isCurrent,
 }: ScheduleTimelineItemProps): React.JSX.Element {
@@ -90,6 +90,8 @@ export function ScheduleTimelineItem({
     </Card>
   );
 }
+
+export const ScheduleTimelineItem = React.memo(ScheduleTimelineItemComponent);
 
 const styles = StyleSheet.create({
   card: {

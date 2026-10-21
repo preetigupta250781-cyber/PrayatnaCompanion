@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "prayatna-companion",
+    "name": "Prayatna Companion",
     "slug": "prayatna-companion",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,17 @@
     "scheme": "prayatnacompanion",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "org.prayatna.companion",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "org.prayatna.companion",
+      "versionCode": 1,
+      "permissions": [],
+      "blockedPermissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

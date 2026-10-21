@@ -39,6 +39,7 @@ export default function TabsLayout(): React.JSX.Element {
         options={{
           title: 'Home',
           headerTitle: 'Prayatna // Home',
+          tabBarAccessibilityLabel: 'Home tab',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="home" color={color} focused={focused} />
           ),
@@ -49,6 +50,7 @@ export default function TabsLayout(): React.JSX.Element {
         options={{
           title: 'Schedule',
           headerTitle: 'Event Schedule',
+          tabBarAccessibilityLabel: 'Schedule tab',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="schedule" color={color} focused={focused} />
           ),
@@ -59,6 +61,7 @@ export default function TabsLayout(): React.JSX.Element {
         options={{
           title: 'Problems',
           headerTitle: 'Problem Statements',
+          tabBarAccessibilityLabel: 'Problem Statements tab',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="problems" color={color} focused={focused} />
           ),
@@ -69,6 +72,7 @@ export default function TabsLayout(): React.JSX.Element {
         options={{
           title: 'Leaderboard',
           headerTitle: 'Live Leaderboard',
+          tabBarAccessibilityLabel: 'Live Leaderboard tab',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="leaderboard" color={color} focused={focused} />
           ),
@@ -79,6 +83,7 @@ export default function TabsLayout(): React.JSX.Element {
         options={{
           title: 'More',
           headerTitle: 'More & Settings',
+          tabBarAccessibilityLabel: 'More and Account tab',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="more" color={color} focused={focused} />
           ),

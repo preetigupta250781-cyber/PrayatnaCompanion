@@ -2,7 +2,7 @@ import { ConfigContext, ExpoConfig } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'prayatna-companion',
+  name: 'Prayatna Companion',
   slug: 'prayatna-companion',
   version: '1.0.0',
   orientation: 'portrait',
@@ -11,10 +11,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
   ios: {
     ...config.ios,
+    bundleIdentifier: 'org.prayatna.companion',
     icon: './assets/expo.icon',
+    supportsTablet: false,
   },
   android: {
     ...config.android,
+    package: 'org.prayatna.companion',
+    versionCode: 1,
+    permissions: [],
+    blockedPermissions: [
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.ACCESS_COARSE_LOCATION',
+    ],
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/images/android-icon-foreground.png',

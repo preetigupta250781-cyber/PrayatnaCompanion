@@ -55,3 +55,7 @@ credentials.csv
 # supabase cli temporary artifacts
 supabase/.temp/
 
+# Next.js admin build output
+admin/.next/
+admin/out/
+

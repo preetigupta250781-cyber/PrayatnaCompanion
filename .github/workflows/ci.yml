@@ -39,3 +39,21 @@ jobs:
 
       - name: Expo Doctor
         run: npx expo-doctor
+
+      - name: Install Admin dependencies
+        run: cd admin && npm ci
+
+      - name: Admin Typecheck
+        run: npm run admin:typecheck
+
+      - name: Admin Lint
+        run: npm run admin:lint
+
+      - name: Admin Test
+        run: npm run admin:test
+
+      - name: Admin Build
+        run: npm run admin:build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL || 'https://cgpqcpyfrajzfdezqgnm.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNncHFjcHlmcmFqemZkZXpxZ25tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNzc1NTksImV4cCI6MjA1NTc1MzU1OX0.Wq3G_wVqfE4mPj35vjWk1V2_yC8qG0Q6Z1xVb3N6L8w' }}

@@ -255,3 +255,51 @@ Overall Status          : ALL INVARIANTS SATISFIED ✅
   git status
   ```
 - [ ] Confirm no `SUPABASE_SERVICE_ROLE_KEY` or direct database connection strings are referenced in `src/` or `app/`.
+
+---
+
+## 7. Next.js Organizer Web Dashboard (`/admin`)
+
+In addition to command-line administration, Prayatna provides a web-based dashboard in `/admin` built with **Next.js 15 (App Router)**, **Tailwind CSS**, and **@supabase/ssr**.
+
+### Access Control & SSR Auth Gate
+
+The admin web dashboard enforces strict server-side access control via Next.js middleware (`admin/src/middleware.ts`):
+
+1. **Unauthenticated users** navigating to any dashboard route are redirected to `/login`.
+2. **Authenticated participants** (`profiles.role = 'participant'`) are blocked with HTTP 403 Forbidden at `/unauthorized`.
+3. **Only verified organizers** (`profiles.role = 'organizer'`) are permitted to access dashboard modules.
+4. All client and server operations interact with Supabase through Row-Level Security (RLS) policies (`is_organizer()`).
+
+### Dashboard Modules & Capabilities
+
+| Module                 | Route            | Capabilities                                                                                                                                                                       |
+| ---------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Overview**           | `/`              | Operational KPI metrics, quick actions, and recent organizer audit feed.                                                                                                           |
+| **Participants**       | `/participants`  | Drag-and-drop CSV roster import with Zod validation, search, role filters, and profile metadata inspector.                                                                         |
+| **Teams**              | `/teams`         | Team roster management, alphanumeric team codes, member lists, and team CRUD.                                                                                                      |
+| **Schedule**           | `/schedule`      | Day-grouped schedule management, IST datetime pickers (`toISTInputValue`/`fromISTInputValue`), chronological validation (`ends_at > starts_at`), and category tags.                |
+| **Problem Statements** | `/problems`      | Track/domain tagging, difficulty rating, IST `release_at` scheduling, release countdown status, and description editor with live safe Markdown preview.                            |
+| **Announcements Desk** | `/announcements` | Real-time push broadcaster with priority tiers (`normal`, `important`, `urgent`), mobile card preview, and deletion.                                                               |
+| **Leaderboard**        | `/leaderboard`   | Competition round selector, team score editor, bulk **Publish Toggle per round** (controlling participant visibility via RLS), and live dense rank preview with podium highlights. |
+| **Bus Transit**        | `/bus`           | Route editor with interactive map supporting **click-to-add-stop** (auto-capturing coordinates) and **polyline path drawing** for bus corridor navigation.                         |
+| **Audit Trail**        | `/audit-logs`    | Immutable audit log table recording all organizer operations with actor email, timestamp in IST, and full JSON metadata inspector.                                                 |
+
+### Running the Admin Dashboard
+
+```bash
+# Start Next.js admin development server (port 3001)
+npm run admin:dev
+
+# Run strict TypeScript typecheck
+npm run admin:typecheck
+
+# Run Next.js linter
+npm run admin:lint
+
+# Run Jest unit and integration tests
+npm run admin:test
+
+# Compile optimized production build
+npm run admin:build
+```

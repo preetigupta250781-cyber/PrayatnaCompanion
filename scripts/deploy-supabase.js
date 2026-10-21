@@ -28,14 +28,21 @@ async function main() {
     await client.query(migrationSql);
     console.log('✅ Migration 0001_init.sql applied successfully!');
 
-    // 2. Run Seed: seed.sql
+    // 2. Run Migration: 0002_audit_logs.sql
+    const auditMigrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '0002_audit_logs.sql');
+    console.log(`\n📦 Applying migration: ${auditMigrationPath}...`);
+    const auditMigrationSql = fs.readFileSync(auditMigrationPath, 'utf8');
+    await client.query(auditMigrationSql);
+    console.log('✅ Migration 0002_audit_logs.sql applied successfully!');
+
+    // 3. Run Seed: seed.sql
     const seedPath = path.join(__dirname, '..', 'supabase', 'seed.sql');
     console.log(`\n🌱 Applying seed data: ${seedPath}...`);
     const seedSql = fs.readFileSync(seedPath, 'utf8');
     await client.query(seedSql);
     console.log('✅ Seed data applied successfully!');
 
-    // 3. Verify Tables & Counts
+    // 4. Verify Tables & Counts
     console.log('\n🔍 Verifying deployed tables and row counts:');
     const tables = [
       'teams',
@@ -47,6 +54,7 @@ async function main() {
       'bus_routes',
       'bus_stops',
       'bus_route_paths',
+      'audit_logs',
     ];
 
     for (const table of tables) {

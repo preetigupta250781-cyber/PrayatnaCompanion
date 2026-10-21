@@ -1,4 +1,4 @@
-export type { Database, Json, Tables, TablesInsert, TablesUpdate, Views } from './database';
+export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './database';
 export * from '@/features/announcements/types';
 export * from '@/features/leaderboard/types';
 export * from '@/features/problems/types';

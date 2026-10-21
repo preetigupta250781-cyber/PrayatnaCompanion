@@ -39,6 +39,48 @@ export type Database = {
           },
         ];
       };
+      audit_logs: {
+        Row: {
+          action: string;
+          actor_email: string | null;
+          actor_id: string | null;
+          created_at: string;
+          id: string;
+          metadata: Json | null;
+          resource_id: string | null;
+          resource_type: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: string;
+          actor_email?: string | null;
+          actor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json | null;
+          resource_id?: string | null;
+          resource_type: string;
+        };
+        Update: {
+          action?: string;
+          actor_email?: string | null;
+          actor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json | null;
+          resource_id?: string | null;
+          resource_type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'audit_logs_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       bus_route_paths: {
         Row: {
           created_at: string;
@@ -470,6 +512,3 @@ export const Constants = {
     Enums: {},
   },
 } as const;
-
-export type Views<T extends keyof Database['public']['Views']> =
-  Database['public']['Views'][T]['Row'];

@@ -15,8 +15,10 @@ export interface StopCoordinate {
 }
 
 export interface LatLngPoint {
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
+  lat?: number;
+  lng?: number;
 }
 
 interface BusMapEditorProps {
@@ -26,6 +28,18 @@ interface BusMapEditorProps {
   onAddStopClick?: (coords: { lat: number; lng: number }) => void;
   onPathChange?: (points: LatLngPoint[]) => void;
   onSelectStop?: (stop: StopCoordinate) => void;
+}
+
+function extractPoint(p: LatLngPoint | null | undefined): [number, number] | null {
+  if (!p) return null;
+  const lat =
+    typeof p.latitude === 'number' ? p.latitude : typeof p.lat === 'number' ? p.lat : undefined;
+  const lng =
+    typeof p.longitude === 'number' ? p.longitude : typeof p.lng === 'number' ? p.lng : undefined;
+  if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+    return [lat, lng];
+  }
+  return null;
 }
 
 export default function BusMapEditor({
@@ -63,9 +77,16 @@ export default function BusMapEditor({
   useEffect(() => {
     if (!isLeafletReady || !L || !mapContainerRef.current || mapInstanceRef.current) return;
 
-    // Default center on India (e.g., Chennai / Bangalore region where Prayatna typically is)
-    const initialLat = stops.length > 0 && stops[0] ? stops[0].latitude : 13.0827;
-    const initialLng = stops.length > 0 && stops[0] ? stops[0].longitude : 80.2707;
+    // Default center on India
+    const firstStop = stops.length > 0 ? stops[0] : undefined;
+    const initialLat =
+      firstStop && typeof firstStop.latitude === 'number' && !isNaN(firstStop.latitude)
+        ? firstStop.latitude
+        : 22.7196;
+    const initialLng =
+      firstStop && typeof firstStop.longitude === 'number' && !isNaN(firstStop.longitude)
+        ? firstStop.longitude
+        : 75.8577;
 
     const map = L.map(mapContainerRef.current, {
       center: [initialLat, initialLng],
@@ -103,7 +124,10 @@ export default function BusMapEditor({
       if (mapMode === 'add_stop' && onAddStopClick) {
         onAddStopClick({ lat, lng });
       } else if (mapMode === 'draw_path' && onPathChange) {
-        const newPoints = [...pathPoints, { latitude: lat, longitude: lng }];
+        const newPoints: LatLngPoint[] = [
+          ...pathPoints,
+          { latitude: lat, longitude: lng, lat, lng },
+        ];
         onPathChange(newPoints);
       }
     };
@@ -126,7 +150,14 @@ export default function BusMapEditor({
     const bounds: [number, number][] = [];
 
     stops.forEach((stop) => {
-      if (typeof stop.latitude !== 'number' || typeof stop.longitude !== 'number') return;
+      if (
+        typeof stop.latitude !== 'number' ||
+        typeof stop.longitude !== 'number' ||
+        isNaN(stop.latitude) ||
+        isNaN(stop.longitude)
+      ) {
+        return;
+      }
       bounds.push([stop.latitude, stop.longitude]);
 
       const iconHtml = `
@@ -181,16 +212,31 @@ export default function BusMapEditor({
     }
 
     // Use pathPoints if present, else fallback to connecting stops in stop_order
-    let lineCoordinates: [number, number][] = [];
+    const lineCoordinates: [number, number][] = [];
     if (pathPoints.length > 0) {
-      lineCoordinates = pathPoints.map((p) => [p.latitude, p.longitude]);
-      pathPoints.forEach((p) => bounds.push([p.latitude, p.longitude]));
+      pathPoints.forEach((p) => {
+        const pt = extractPoint(p);
+        if (pt) {
+          lineCoordinates.push(pt);
+          bounds.push(pt);
+        }
+      });
     } else if (stops.length > 1) {
       const sortedStops = [...stops].sort((a, b) => a.stop_order - b.stop_order);
-      lineCoordinates = sortedStops.map((s) => [s.latitude, s.longitude]);
+      sortedStops.forEach((s) => {
+        if (
+          typeof s.latitude === 'number' &&
+          typeof s.longitude === 'number' &&
+          !isNaN(s.latitude) &&
+          !isNaN(s.longitude)
+        ) {
+          lineCoordinates.push([s.latitude, s.longitude]);
+        }
+      });
     }
 
-    if (lineCoordinates.length > 0) {
+    // Only draw polyline if we have at least 2 valid coordinates
+    if (lineCoordinates.length >= 2) {
       const poly = L.polyline(lineCoordinates, {
         color: routeColor || '#00F0FF',
         weight: 4,
@@ -204,9 +250,13 @@ export default function BusMapEditor({
     // Auto fit bounds if coordinates exist and view mode isn't actively drawing
     if (bounds.length > 0 && mapMode === 'view') {
       try {
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-      } catch {
-        // Safe catch for zero area bounds
+        if (bounds.length === 1 && bounds[0]) {
+          map.setView(bounds[0], 13);
+        } else {
+          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+        }
+      } catch (err) {
+        console.warn('Map bounds fit error ignored:', err);
       }
     }
   }, [stops, pathPoints, routeColor, L, onSelectStop, mapMode]);

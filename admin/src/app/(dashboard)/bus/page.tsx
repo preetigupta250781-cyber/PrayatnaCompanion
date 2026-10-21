@@ -143,7 +143,25 @@ export default function BusRoutesAdminPage() {
         setStops(stopsRes.data || []);
 
         if (pathRes.data && Array.isArray(pathRes.data.points)) {
-          setPathPoints(pathRes.data.points as unknown as LatLngPoint[]);
+          const parsedPoints: LatLngPoint[] = [];
+          (pathRes.data.points as Array<Record<string, unknown>>).forEach((pt) => {
+            const lat =
+              typeof pt['latitude'] === 'number'
+                ? (pt['latitude'] as number)
+                : typeof pt['lat'] === 'number'
+                  ? (pt['lat'] as number)
+                  : undefined;
+            const lng =
+              typeof pt['longitude'] === 'number'
+                ? (pt['longitude'] as number)
+                : typeof pt['lng'] === 'number'
+                  ? (pt['lng'] as number)
+                  : undefined;
+            if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+              parsedPoints.push({ latitude: lat, longitude: lng, lat, lng });
+            }
+          });
+          setPathPoints(parsedPoints);
         } else {
           setPathPoints([]);
         }
@@ -433,12 +451,17 @@ export default function BusRoutesAdminPage() {
     setIsSavingPath(true);
     setStatusMessage(null);
     try {
-      // Upsert to bus_route_paths
+      // Upsert to bus_route_paths with standard { lat, lng } points
+      const pointsToPersist = pathPoints.map((p) => ({
+        lat: typeof p.latitude === 'number' ? p.latitude : p.lat,
+        lng: typeof p.longitude === 'number' ? p.longitude : p.lng,
+      }));
+
       const { error: pathErr } = await supabase.from('bus_route_paths').upsert(
         {
           route_id: selectedRouteId,
           points:
-            pathPoints as unknown as Database['public']['Tables']['bus_route_paths']['Insert']['points'],
+            pointsToPersist as unknown as Database['public']['Tables']['bus_route_paths']['Insert']['points'],
         },
         { onConflict: 'route_id' }
       );
